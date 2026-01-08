@@ -12,6 +12,7 @@ interface GoalCardProps {
 // Map database colors to Tailwind classes
 const colorStyles: Record<string, { bg: string, text: string, border: string }> = {
   blue: { bg: "bg-blue-50", text: "text-blue-700", border: "border-blue-100" },
+  emerald: { bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-100" },
   green: { bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-100" },
   purple: { bg: "bg-purple-50", text: "text-purple-700", border: "border-purple-100" },
   pink: { bg: "bg-pink-50", text: "text-pink-700", border: "border-pink-100" },
