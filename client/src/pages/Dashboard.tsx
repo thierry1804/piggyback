@@ -66,14 +66,14 @@ export default function Dashboard() {
             <p className="text-sm font-bold text-primary/80 tracking-wider uppercase mb-1 font-display">Total Savings</p>
             <div className="flex items-baseline gap-2 mb-4">
               <span className="text-5xl sm:text-6xl font-bold text-foreground font-mono tracking-tight">
-                ${(totalSaved / 100).toLocaleString()}
+                {goals?.[0]?.currencySymbol || "$"}{(totalSaved / 100).toLocaleString()}
               </span>
             </div>
             
             <div className="max-w-md space-y-2">
               <div className="flex justify-between text-sm font-medium text-muted-foreground">
                 <span>Total Progress</span>
-                <span>{progressPercentage.toFixed(1)}% of ${(totalTarget / 100).toLocaleString()}</span>
+                <span>{progressPercentage.toFixed(1)}% of {goals?.[0]?.currencySymbol || "$"}{(totalTarget / 100).toLocaleString()}</span>
               </div>
               <div className="h-3 w-full bg-background rounded-full overflow-hidden border border-primary/10">
                 <div 

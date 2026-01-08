@@ -10,6 +10,10 @@ import {
 import { eq, desc, sql } from "drizzle-orm";
 
 export interface IStorage {
+  // Settings
+  getSettings(): Promise<{ currencyCode: string; currencySymbol: string }>;
+  updateSettings(settings: { currencyCode: string; currencySymbol: string }): Promise<{ currencyCode: string; currencySymbol: string }>;
+
   // Goals
   getGoals(): Promise<Goal[]>;
   getGoal(id: number): Promise<(Goal & { transactions: Transaction[] }) | undefined>;
@@ -22,6 +26,32 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
+  async getSettings(): Promise<{ currencyCode: string; currencySymbol: string }> {
+    const [row] = await db.select().from(settings).limit(1);
+    if (!row) {
+      const [newRow] = await db
+        .insert(settings)
+        .values({ currencyCode: "USD", currencySymbol: "$" })
+        .returning();
+      return newRow;
+    }
+    return row;
+  }
+
+  async updateSettings(updates: { currencyCode: string; currencySymbol: string }): Promise<{ currencyCode: string; currencySymbol: string }> {
+    const [existing] = await db.select().from(settings).limit(1);
+    if (!existing) {
+      const [newRow] = await db.insert(settings).values(updates).returning();
+      return newRow;
+    }
+    const [updated] = await db
+      .update(settings)
+      .set(updates)
+      .where(eq(settings.id, existing.id))
+      .returning();
+    return updated;
+  }
+
   async getGoals(): Promise<Goal[]> {
     return await db.select().from(goals).orderBy(desc(goals.createdAt));
   }

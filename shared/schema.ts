@@ -3,14 +3,22 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
 
+export const settings = pgTable("settings", {
+  id: serial("id").primaryKey(),
+  currencyCode: text("currency_code").default("USD").notNull(),
+  currencySymbol: text("currency_symbol").default("$").notNull(),
+});
+
 export const goals = pgTable("goals", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description"),
-  targetAmount: integer("target_amount").notNull(), // stored in cents
-  currentAmount: integer("current_amount").default(0).notNull(), // stored in cents
+  targetAmount: integer("target_amount").notNull(), // stored in cents/smallest unit
+  currentAmount: integer("current_amount").default(0).notNull(), // stored in cents/smallest unit
   icon: text("icon").default("🐷"),
   color: text("color").default("blue"), // for UI theming
+  currencyCode: text("currency_code").default("USD").notNull(),
+  currencySymbol: text("currency_symbol").default("$").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -39,6 +47,8 @@ export const insertGoalSchema = createInsertSchema(goals).pick({
   targetAmount: true,
   icon: true,
   color: true,
+  currencyCode: true,
+  currencySymbol: true,
 });
 
 export const insertTransactionSchema = createInsertSchema(transactions).pick({

@@ -22,6 +22,8 @@ export function CreateGoalDialog() {
   const [targetAmount, setTargetAmount] = useState<number | "">("");
   const [icon, setIcon] = useState("🐷");
   const [color, setColor] = useState("blue");
+  const [currencyCode, setCurrencyCode] = useState("MGA");
+  const [currencySymbol, setCurrencySymbol] = useState("Ar");
   
   const { mutate, isPending } = useCreateGoal();
   const { toast } = useToast();
@@ -31,6 +33,8 @@ export function CreateGoalDialog() {
     setTargetAmount("");
     setIcon("🐷");
     setColor("blue");
+    setCurrencyCode("MGA");
+    setCurrencySymbol("Ar");
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -43,6 +47,8 @@ export function CreateGoalDialog() {
         targetAmount: Number(targetAmount),
         icon,
         color,
+        currencyCode,
+        currencySymbol,
       },
       {
         onSuccess: () => {
@@ -112,6 +118,27 @@ export function CreateGoalDialog() {
               onChange={setTargetAmount}
               placeholder="1000.00"
             />
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-foreground/80 font-display">Currency Code</label>
+                <input
+                  value={currencyCode}
+                  onChange={(e) => setCurrencyCode(e.target.value.toUpperCase())}
+                  placeholder="MGA"
+                  className="w-full px-4 py-3 rounded-xl bg-background border-2 border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-foreground/80 font-display">Symbol</label>
+                <input
+                  value={currencySymbol}
+                  onChange={(e) => setCurrencySymbol(e.target.value)}
+                  placeholder="Ar"
+                  className="w-full px-4 py-3 rounded-xl bg-background border-2 border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
+                />
+              </div>
+            </div>
 
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-foreground/80 font-display">Pick an Icon</label>

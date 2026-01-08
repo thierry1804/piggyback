@@ -58,7 +58,7 @@ export function GoalCard({ goal, onQuickAdd }: GoalCardProps) {
           {goal.name}
         </h3>
         <p className="text-2xl font-bold text-foreground/80 font-mono tracking-tight mb-4">
-          ${(goal.currentAmount / 100).toLocaleString()}
+          {goal.currencySymbol}{(goal.currentAmount / 100).toLocaleString()}
         </p>
         
         <ProgressBar 

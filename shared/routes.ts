@@ -15,6 +15,33 @@ export const errorSchemas = {
 };
 
 export const api = {
+  settings: {
+    get: {
+      method: 'GET' as const,
+      path: '/api/settings',
+      responses: {
+        200: z.object({
+          currencyCode: z.string(),
+          currencySymbol: z.string(),
+        }),
+      },
+    },
+    update: {
+      method: 'PATCH' as const,
+      path: '/api/settings',
+      input: z.object({
+        currencyCode: z.string(),
+        currencySymbol: z.string(),
+      }),
+      responses: {
+        200: z.object({
+          currencyCode: z.string(),
+          currencySymbol: z.string(),
+        }),
+        400: errorSchemas.validation,
+      },
+    },
+  },
   goals: {
     list: {
       method: 'GET' as const,

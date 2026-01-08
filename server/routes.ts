@@ -8,6 +8,28 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  // Settings
+  app.get(api.settings.get.path, async (req, res) => {
+    const s = await storage.getSettings();
+    res.json(s);
+  });
+
+  app.patch(api.settings.update.path, async (req, res) => {
+    try {
+      const input = api.settings.update.input.parse(req.body);
+      const updated = await storage.updateSettings(input);
+      res.json(updated);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({
+          message: err.errors[0].message,
+          field: err.errors[0].path.join("."),
+        });
+      }
+      throw err;
+    }
+  });
+
   // Goals
   app.get(api.goals.list.path, async (req, res) => {
     const goals = await storage.getGoals();
@@ -80,7 +102,9 @@ export async function registerRoutes(
       targetAmount: 50000, // $500.00
       currentAmount: 0,
       icon: "🚲",
-      color: "emerald"
+      color: "emerald",
+      currencyCode: "MGA",
+      currencySymbol: "Ar"
     });
     await storage.createGoal({
       name: "Vacation 🏖️",
@@ -88,7 +112,9 @@ export async function registerRoutes(
       targetAmount: 200000, // $2000.00
       currentAmount: 0,
       icon: "🏖️",
-      color: "blue"
+      color: "blue",
+      currencyCode: "USD",
+      currencySymbol: "$"
     });
      await storage.createGoal({
       name: "Emergency Fund 🚑",
@@ -96,7 +122,9 @@ export async function registerRoutes(
       targetAmount: 100000, // $1000.00
       currentAmount: 0,
       icon: "🚑",
-      color: "red"
+      color: "red",
+      currencyCode: "USD",
+      currencySymbol: "$"
     });
   }
 
