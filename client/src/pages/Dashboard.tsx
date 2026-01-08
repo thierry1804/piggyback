@@ -50,32 +50,32 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <main className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-12">
+      <main className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-8 sm:space-y-12">
         {/* Total Savings Card */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="bg-primary/5 border border-primary/10 rounded-3xl p-8 relative overflow-hidden"
+          className="bg-primary/5 border border-primary/10 rounded-2xl sm:rounded-3xl p-6 sm:p-8 relative overflow-hidden"
         >
-          <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
+          <div className="absolute top-0 right-0 p-8 sm:p-12 opacity-5 pointer-events-none hidden sm:block">
             <PiggyBank size={200} />
           </div>
           
           <div className="relative z-10">
-            <p className="text-sm font-bold text-primary/80 tracking-wider uppercase mb-1 font-display">Total Savings</p>
+            <p className="text-xs sm:text-sm font-bold text-primary/80 tracking-wider uppercase mb-1 font-display">Total Savings</p>
             <div className="flex items-baseline gap-2 mb-4">
-              <span className="text-5xl sm:text-6xl font-bold text-foreground font-mono tracking-tight">
+              <span className="text-4xl sm:text-6xl font-bold text-foreground font-mono tracking-tight break-all">
                 {goals?.[0]?.currencySymbol || "$"}{(totalSaved / 100).toLocaleString()}
               </span>
             </div>
             
             <div className="max-w-md space-y-2">
-              <div className="flex justify-between text-sm font-medium text-muted-foreground">
-                <span>Total Progress</span>
-                <span>{progressPercentage.toFixed(1)}% of {goals?.[0]?.currencySymbol || "$"}{(totalTarget / 100).toLocaleString()}</span>
+              <div className="flex justify-between text-xs sm:text-sm font-medium text-muted-foreground gap-2">
+                <span>Progress</span>
+                <span className="text-right">{progressPercentage.toFixed(1)}% of {goals?.[0]?.currencySymbol || "$"}{(totalTarget / 100).toLocaleString()}</span>
               </div>
-              <div className="h-3 w-full bg-background rounded-full overflow-hidden border border-primary/10">
+              <div className="h-2.5 sm:h-3 w-full bg-background rounded-full overflow-hidden border border-primary/10">
                 <div 
                   className="h-full bg-primary rounded-full transition-all duration-1000 ease-out"
                   style={{ width: `${progressPercentage}%` }}

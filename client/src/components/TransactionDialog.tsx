@@ -70,10 +70,10 @@ export function TransactionDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md rounded-3xl p-0 overflow-hidden border-0 gap-0">
+      <DialogContent className="w-[95%] sm:max-w-md rounded-2xl sm:rounded-3xl p-0 overflow-hidden border-0 gap-0">
         <div className={`h-2 w-full ${isDeposit ? 'bg-primary' : 'bg-orange-500'}`} />
         
-        <div className="p-6">
+        <div className="p-5 sm:p-6">
           <DialogHeader className="mb-6">
             <DialogTitle className="text-2xl font-display font-bold">
               {isDeposit ? "Add Savings" : "Withdraw Funds"}

@@ -109,22 +109,22 @@ export default function GoalDetails() {
         </div>
 
         {/* Hero Card */}
-        <div className="bg-white rounded-[2rem] p-6 sm:p-10 shadow-xl shadow-black/5 border border-border/50 mb-10 overflow-hidden relative">
-          <div className="flex flex-col md:flex-row gap-8 items-start md:items-center relative z-10">
+        <div className="bg-white rounded-2xl sm:rounded-[2rem] p-5 sm:p-10 shadow-xl shadow-black/5 border border-border/50 mb-6 sm:mb-10 overflow-hidden relative">
+          <div className="flex flex-col md:flex-row gap-6 sm:gap-8 items-start md:items-center relative z-10">
             <div className={cn(
-              "w-24 h-24 rounded-3xl flex items-center justify-center text-5xl shadow-inner",
+              "w-20 h-20 sm:w-24 sm:h-24 rounded-2xl sm:rounded-3xl flex items-center justify-center text-4xl sm:text-5xl shadow-inner",
               `bg-${goal.color || "blue"}-50`
             )}>
               {goal.icon}
             </div>
             
             <div className="flex-1 w-full">
-              <h1 className="text-3xl sm:text-4xl font-bold font-display mb-2">{goal.name}</h1>
-              <div className="flex items-baseline gap-2 mb-6">
-                <span className="text-5xl font-bold font-mono tracking-tight text-foreground">
+              <h1 className="text-2xl sm:text-4xl font-bold font-display mb-2">{goal.name}</h1>
+              <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2 mb-6">
+                <span className="text-4xl sm:text-5xl font-bold font-mono tracking-tight text-foreground break-all">
                   {goal.currencySymbol}{(goal.currentAmount / 100).toLocaleString()}
                 </span>
-                <span className="text-xl text-muted-foreground font-medium">
+                <span className="text-lg sm:text-xl text-muted-foreground font-medium">
                   of {goal.currencySymbol}{(goal.targetAmount / 100).toLocaleString()}
                 </span>
               </div>
@@ -136,23 +136,23 @@ export default function GoalDetails() {
                 size="lg"
                 showText={false}
               />
-              <div className="mt-2 text-right font-medium text-sm text-muted-foreground">
+              <div className="mt-2 text-right font-medium text-xs sm:text-sm text-muted-foreground">
                 {percentage.toFixed(1)}% Completed
               </div>
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-4 mt-10">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-8 sm:mt-10">
             <button
               onClick={() => setTransactionModal({ open: true, type: "deposit" })}
-              className="flex-1 py-4 px-6 rounded-2xl bg-primary text-white font-bold text-lg shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
+              className="flex-1 py-3.5 sm:py-4 px-6 rounded-xl sm:rounded-2xl bg-primary text-white font-bold text-base sm:text-lg shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
             >
               Add Savings
             </button>
             <button
               onClick={() => setTransactionModal({ open: true, type: "withdraw" })}
-              className="flex-1 py-4 px-6 rounded-2xl bg-white border-2 border-border text-foreground font-bold text-lg hover:bg-muted/30 hover:border-muted-foreground/20 transition-all duration-200"
+              className="flex-1 py-3.5 sm:py-4 px-6 rounded-xl sm:rounded-2xl bg-white border-2 border-border text-foreground font-bold text-base sm:text-lg hover:bg-muted/30 hover:border-muted-foreground/20 transition-all duration-200"
             >
               Withdraw
             </button>

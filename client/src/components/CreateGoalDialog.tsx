@@ -74,27 +74,27 @@ export function CreateGoalDialog() {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <button className="
-          inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold
+          inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold
           bg-primary text-primary-foreground shadow-lg shadow-primary/25
           hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5
           active:translate-y-0 active:shadow-md
-          transition-all duration-200 ease-out
+          transition-all duration-200 ease-out w-full md:w-auto
         ">
           <Plus className="w-5 h-5" />
           <span>New Goal</span>
         </button>
       </DialogTrigger>
       
-      <DialogContent className="sm:max-w-md rounded-3xl p-0 overflow-hidden border-0">
-        <div className={cn("h-32 w-full flex items-center justify-center transition-colors duration-300", 
+      <DialogContent className="w-[95%] sm:max-w-md rounded-2xl sm:rounded-3xl p-0 overflow-hidden border-0">
+        <div className={cn("h-24 sm:h-32 w-full flex items-center justify-center transition-colors duration-300", 
           `bg-${color === 'blue' ? 'blue' : color === 'green' ? 'emerald' : color === 'red' ? 'rose' : color}-100`
         )}>
-          <div className="text-6xl animate-enter">
+          <div className="text-5xl sm:text-6xl animate-enter">
             {icon}
           </div>
         </div>
         
-        <div className="p-6">
+        <div className="p-5 sm:p-6">
           <DialogHeader className="mb-6">
             <DialogTitle className="text-2xl font-display font-bold">Create New Goal</DialogTitle>
             <DialogDescription>What are you saving up for?</DialogDescription>
