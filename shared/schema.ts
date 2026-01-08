@@ -1,18 +1,53 @@
-import { sql } from "drizzle-orm";
-import { pgTable, text, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { relations } from "drizzle-orm";
 
-export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+export const goals = pgTable("goals", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  targetAmount: integer("target_amount").notNull(), // stored in cents
+  currentAmount: integer("current_amount").default(0).notNull(), // stored in cents
+  icon: text("icon").default("🐷"),
+  color: text("color").default("blue"), // for UI theming
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
+export const transactions = pgTable("transactions", {
+  id: serial("id").primaryKey(),
+  goalId: integer("goal_id").notNull(),
+  amount: integer("amount").notNull(), // positive for deposit, negative for withdraw
+  note: text("note"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
+export const goalsRelations = relations(goals, ({ many }) => ({
+  transactions: many(transactions),
+}));
+
+export const transactionsRelations = relations(transactions, ({ one }) => ({
+  goal: one(goals, {
+    fields: [transactions.goalId],
+    references: [goals.id],
+  }),
+}));
+
+export const insertGoalSchema = createInsertSchema(goals).pick({
+  name: true,
+  description: true,
+  targetAmount: true,
+  icon: true,
+  color: true,
+});
+
+export const insertTransactionSchema = createInsertSchema(transactions).pick({
+  goalId: true,
+  amount: true,
+  note: true,
+});
+
+export type Goal = typeof goals.$inferSelect;
+export type InsertGoal = z.infer<typeof insertGoalSchema>;
+export type Transaction = typeof transactions.$inferSelect;
+export type InsertTransaction = z.infer<typeof insertTransactionSchema>;

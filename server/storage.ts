@@ -1,38 +1,69 @@
-import { type User, type InsertUser } from "@shared/schema";
-import { randomUUID } from "crypto";
-
-// modify the interface with any CRUD methods
-// you might need
+import { db } from "./db";
+import {
+  goals,
+  transactions,
+  type Goal,
+  type InsertGoal,
+  type Transaction,
+  type InsertTransaction,
+} from "@shared/schema";
+import { eq, desc, sql } from "drizzle-orm";
 
 export interface IStorage {
-  getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  // Goals
+  getGoals(): Promise<Goal[]>;
+  getGoal(id: number): Promise<(Goal & { transactions: Transaction[] }) | undefined>;
+  createGoal(goal: InsertGoal): Promise<Goal>;
+  deleteGoal(id: number): Promise<void>;
+  updateGoalAmount(id: number, amountDelta: number): Promise<void>;
+
+  // Transactions
+  createTransaction(transaction: InsertTransaction): Promise<Transaction>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-
-  constructor() {
-    this.users = new Map();
+export class DatabaseStorage implements IStorage {
+  async getGoals(): Promise<Goal[]> {
+    return await db.select().from(goals).orderBy(desc(goals.createdAt));
   }
 
-  async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+  async getGoal(id: number): Promise<(Goal & { transactions: Transaction[] }) | undefined> {
+    const goal = await db.select().from(goals).where(eq(goals.id, id));
+    if (!goal.length) return undefined;
+
+    const history = await db
+      .select()
+      .from(transactions)
+      .where(eq(transactions.goalId, id))
+      .orderBy(desc(transactions.createdAt));
+
+    return { ...goal[0], transactions: history };
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+  async createGoal(insertGoal: InsertGoal): Promise<Goal> {
+    const [newGoal] = await db.insert(goals).values(insertGoal).returning();
+    return newGoal;
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
+  async deleteGoal(id: number): Promise<void> {
+    await db.delete(transactions).where(eq(transactions.goalId, id));
+    await db.delete(goals).where(eq(goals.id, id));
+  }
+
+  async updateGoalAmount(id: number, amountDelta: number): Promise<void> {
+    await db
+      .update(goals)
+      .set({
+        currentAmount: sql`${goals.currentAmount} + ${amountDelta}`,
+      })
+      .where(eq(goals.id, id));
+  }
+
+  async createTransaction(insertTransaction: InsertTransaction): Promise<Transaction> {
+    const [txn] = await db.insert(transactions).values(insertTransaction).returning();
+    // Update the goal's current amount
+    await this.updateGoalAmount(txn.goalId, txn.amount);
+    return txn;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
