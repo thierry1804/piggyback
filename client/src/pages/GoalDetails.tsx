@@ -122,10 +122,10 @@ export default function GoalDetails() {
               <h1 className="text-3xl sm:text-4xl font-bold font-display mb-2">{goal.name}</h1>
               <div className="flex items-baseline gap-2 mb-6">
                 <span className="text-5xl font-bold font-mono tracking-tight text-foreground">
-                  ${(goal.currentAmount / 100).toLocaleString()}
+                  {goal.currencySymbol}{(goal.currentAmount / 100).toLocaleString()}
                 </span>
                 <span className="text-xl text-muted-foreground font-medium">
-                  of ${(goal.targetAmount / 100).toLocaleString()}
+                  of {goal.currencySymbol}{(goal.targetAmount / 100).toLocaleString()}
                 </span>
               </div>
               
@@ -202,7 +202,7 @@ export default function GoalDetails() {
                       "font-mono font-bold text-lg",
                       tx.amount > 0 ? "text-emerald-600" : "text-foreground"
                     )}>
-                      {tx.amount > 0 ? "+" : ""}{(tx.amount / 100).toLocaleString("en-US", { style: "currency", currency: "USD" })}
+                      {tx.amount > 0 ? "+" : ""}{goal.currencySymbol}{(Math.abs(tx.amount) / 100).toLocaleString()}
                     </div>
                   </motion.li>
                 ))}

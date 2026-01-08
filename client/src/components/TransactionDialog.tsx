@@ -47,10 +47,11 @@ export function TransactionDialog({
         note: note || undefined,
       },
       {
-        onSuccess: () => {
+        onSuccess: (data) => {
+          // Use a generic placeholder or fetch symbol if needed, but for now we'll just use the amount
           toast({
             title: type === "deposit" ? "Saved!" : "Withdrawn",
-            description: `Successfully ${type === "deposit" ? "added" : "withdrew"} $${(Math.abs(amount) / 100).toFixed(2)}`,
+            description: `Successfully ${type === "deposit" ? "added" : "withdrew"} amount`,
           });
           onClose();
         },
