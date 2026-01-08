@@ -38,7 +38,7 @@ export function CurrencyInput({ value, onChange, className, label, error, ...pro
       )}
       <div className="relative group">
         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-semibold group-focus-within:text-primary transition-colors">
-          $
+          {props.placeholder?.includes('Ar') ? 'Ar' : '$'}
         </span>
         <input
           type="number"

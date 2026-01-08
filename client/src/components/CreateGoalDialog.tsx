@@ -85,8 +85,8 @@ export function CreateGoalDialog() {
         </button>
       </DialogTrigger>
       
-      <DialogContent className="w-[95%] sm:max-w-md rounded-2xl sm:rounded-3xl p-0 overflow-hidden border-0">
-        <div className={cn("h-24 sm:h-32 w-full flex items-center justify-center transition-colors duration-300", 
+      <DialogContent className="w-[95%] sm:max-w-md rounded-2xl sm:rounded-3xl p-0 overflow-hidden border-0 max-h-[90vh] flex flex-col">
+        <div className={cn("h-24 sm:h-32 w-full flex-shrink-0 flex items-center justify-center transition-colors duration-300", 
           `bg-${color === 'blue' ? 'blue' : color === 'green' ? 'emerald' : color === 'red' ? 'rose' : color}-100`
         )}>
           <div className="text-5xl sm:text-6xl animate-enter">
@@ -94,13 +94,13 @@ export function CreateGoalDialog() {
           </div>
         </div>
         
-        <div className="p-5 sm:p-6">
+        <div className="p-5 sm:p-6 overflow-y-auto custom-scrollbar">
           <DialogHeader className="mb-6">
             <DialogTitle className="text-2xl font-display font-bold">Create New Goal</DialogTitle>
             <DialogDescription>What are you saving up for?</DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6 pb-2">
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-foreground/80 font-display">Goal Name</label>
               <input
@@ -116,7 +116,7 @@ export function CreateGoalDialog() {
               label="Target Amount"
               value={targetAmount}
               onChange={setTargetAmount}
-              placeholder="1000.00"
+              placeholder={`${currencySymbol} 1000.00`}
             />
 
             <div className="grid grid-cols-2 gap-4">
