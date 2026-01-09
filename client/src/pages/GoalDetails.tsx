@@ -9,10 +9,12 @@ import {
   TrendingUp, 
   TrendingDown, 
   Calendar,
-  AlertCircle
+  AlertCircle,
+  Lightbulb
 } from "lucide-react";
 import { useState } from "react";
-import { format } from "date-fns";
+import { format, isPast, differenceInDays } from "date-fns";
+import { calculateSavingsAdvice } from "@/lib/utils";
 import { motion } from "framer-motion";
 import {
   AlertDialog,
@@ -26,12 +28,15 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
+import { useSettings } from "@/hooks/use-settings";
 
 export default function GoalDetails() {
   const [, params] = useRoute("/goal/:id");
   const id = parseInt(params?.id || "0");
   const { data: goal, isLoading, isError } = useGoal(id);
   const { mutate: deleteGoal } = useDeleteGoal();
+  const { data: settings } = useSettings();
+  const currencySymbol = settings?.currencySymbol || "Ar";
   
   const [transactionModal, setTransactionModal] = useState<{
     open: boolean;
@@ -66,6 +71,15 @@ export default function GoalDetails() {
   };
 
   const percentage = Math.min(100, (goal.currentAmount / goal.targetAmount) * 100);
+  const deadlineDate = goal.deadline ? new Date(goal.deadline) : null;
+  const isOverdue = deadlineDate ? isPast(deadlineDate) : false;
+  const daysRemaining = deadlineDate ? differenceInDays(deadlineDate, new Date()) : null;
+  const savingsAdvice = calculateSavingsAdvice(
+    goal.currentAmount,
+    goal.targetAmount,
+    goal.deadline,
+    currencySymbol
+  );
   
   // Sort transactions by date desc
   const transactions = [...(goal.transactions || [])].sort(
@@ -122,10 +136,10 @@ export default function GoalDetails() {
               <h1 className="text-2xl sm:text-4xl font-bold font-display mb-2">{goal.name}</h1>
               <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2 mb-6">
                 <span className="text-4xl sm:text-5xl font-bold font-mono tracking-tight text-foreground break-all">
-                  {goal.currencySymbol}{(goal.currentAmount / 100).toLocaleString()}
+                  {currencySymbol}{(goal.currentAmount / 100).toLocaleString()}
                 </span>
                 <span className="text-lg sm:text-xl text-muted-foreground font-medium">
-                  of {goal.currencySymbol}{(goal.targetAmount / 100).toLocaleString()}
+                  of {currencySymbol}{(goal.targetAmount / 100).toLocaleString()}
                 </span>
               </div>
               
@@ -135,10 +149,52 @@ export default function GoalDetails() {
                 color={goal.color || "blue"} 
                 size="lg"
                 showText={false}
+                currencySymbol={currencySymbol}
               />
-              <div className="mt-2 text-right font-medium text-xs sm:text-sm text-muted-foreground">
-                {percentage.toFixed(1)}% Completed
+              <div className="mt-2 flex items-center justify-between">
+                <div className={cn(
+                  "flex items-center gap-2 text-xs sm:text-sm font-medium",
+                  isOverdue ? "text-destructive" : daysRemaining !== null && daysRemaining <= 7 ? "text-orange-600" : "text-muted-foreground"
+                )}>
+                  {deadlineDate && (
+                    <>
+                      <Calendar className="w-4 h-4" />
+                      <span>
+                        {isOverdue 
+                          ? `Overdue by ${Math.abs(daysRemaining || 0)} days`
+                          : daysRemaining === 0
+                          ? "Due today"
+                          : daysRemaining === 1
+                          ? "Due tomorrow"
+                          : daysRemaining !== null
+                          ? `Due in ${daysRemaining} days`
+                          : ""
+                        }
+                      </span>
+                      <span className="text-muted-foreground/60">
+                        ({format(deadlineDate, "MMM d, yyyy")})
+                      </span>
+                    </>
+                  )}
+                </div>
+                <div className="text-right font-medium text-xs sm:text-sm text-muted-foreground">
+                  {percentage.toFixed(1)}% Completed
+                </div>
               </div>
+              
+              {savingsAdvice && !isOverdue && (
+                <div className="mt-4 p-4 rounded-xl bg-primary/5 border border-primary/10">
+                  <div className="flex items-start gap-3">
+                    <Lightbulb className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-foreground mb-1">💡 Conseil d'épargne</p>
+                      <p className="text-sm text-foreground/80 leading-relaxed">
+                        {savingsAdvice.advice}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -202,7 +258,7 @@ export default function GoalDetails() {
                       "font-mono font-bold text-lg",
                       tx.amount > 0 ? "text-emerald-600" : "text-foreground"
                     )}>
-                      {tx.amount > 0 ? "+" : ""}{goal.currencySymbol}{(Math.abs(tx.amount) / 100).toLocaleString()}
+                      {tx.amount > 0 ? "+" : ""}{currencySymbol}{(Math.abs(tx.amount) / 100).toLocaleString()}
                     </div>
                   </motion.li>
                 ))}

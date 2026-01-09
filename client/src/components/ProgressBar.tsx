@@ -8,6 +8,7 @@ interface ProgressBarProps {
   size?: "sm" | "md" | "lg";
   className?: string;
   showText?: boolean;
+  currencySymbol?: string;
 }
 
 const colorMap: Record<string, string> = {
@@ -34,7 +35,8 @@ export function ProgressBar({
   color = "blue", 
   size = "md", 
   className,
-  showText = false
+  showText = false,
+  currencySymbol = "Ar"
 }: ProgressBarProps) {
   const percentage = Math.min(100, Math.max(0, (current / target) * 100));
   
@@ -60,7 +62,7 @@ export function ProgressBar({
       {showText && (
         <div className="flex justify-between items-center text-xs font-medium text-muted-foreground">
           <span>{percentage.toFixed(0)}%</span>
-          <span>${(target / 100).toLocaleString()} target</span>
+          <span>{currencySymbol}{(target / 100).toLocaleString()} target</span>
         </div>
       )}
     </div>

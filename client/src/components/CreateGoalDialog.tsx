@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCreateGoal } from "@/hooks/use-goals";
+import { useSettings } from "@/hooks/use-settings";
 import { CurrencyInput } from "./CurrencyInput";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -22,8 +23,10 @@ export function CreateGoalDialog() {
   const [targetAmount, setTargetAmount] = useState<number | "">("");
   const [icon, setIcon] = useState("🐷");
   const [color, setColor] = useState("blue");
-  const [currencyCode, setCurrencyCode] = useState("MGA");
-  const [currencySymbol, setCurrencySymbol] = useState("Ar");
+  const [deadline, setDeadline] = useState<string>("");
+  const { data: settings } = useSettings();
+  const currencyCode = settings?.currencyCode || "MGA";
+  const currencySymbol = settings?.currencySymbol || "Ar";
   
   const { mutate, isPending } = useCreateGoal();
   const { toast } = useToast();
@@ -33,8 +36,7 @@ export function CreateGoalDialog() {
     setTargetAmount("");
     setIcon("🐷");
     setColor("blue");
-    setCurrencyCode("MGA");
-    setCurrencySymbol("Ar");
+    setDeadline("");
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -47,8 +49,7 @@ export function CreateGoalDialog() {
         targetAmount: Number(targetAmount),
         icon,
         color,
-        currencyCode,
-        currencySymbol,
+        deadline: deadline ? new Date(deadline).toISOString() : null,
       },
       {
         onSuccess: () => {
@@ -119,25 +120,18 @@ export function CreateGoalDialog() {
               placeholder={`${currencySymbol} 1000.00`}
             />
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground/80 font-display">Currency Code</label>
-                <input
-                  value={currencyCode}
-                  onChange={(e) => setCurrencyCode(e.target.value.toUpperCase())}
-                  placeholder="MGA"
-                  className="w-full px-4 py-3 rounded-xl bg-background border-2 border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground/80 font-display">Symbol</label>
-                <input
-                  value={currencySymbol}
-                  onChange={(e) => setCurrencySymbol(e.target.value)}
-                  placeholder="Ar"
-                  className="w-full px-4 py-3 rounded-xl bg-background border-2 border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
-                />
-              </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-foreground/80 font-display">
+                Deadline (Optional)
+              </label>
+              <input
+                type="date"
+                value={deadline}
+                onChange={(e) => setDeadline(e.target.value)}
+                min={new Date().toISOString().split('T')[0]}
+                className="w-full px-4 py-3 rounded-xl bg-background border-2 border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
+              />
+              <p className="text-xs text-muted-foreground">Set a target date for this goal (optional)</p>
             </div>
 
             <div className="space-y-1.5">

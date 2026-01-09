@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { useCreateTransaction } from "@/hooks/use-transactions";
+import { useGoal } from "@/hooks/use-goals";
+import { useSettings } from "@/hooks/use-settings";
 import { CurrencyInput } from "./CurrencyInput";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -24,6 +26,8 @@ export function TransactionDialog({
   const [note, setNote] = useState("");
   const { mutate, isPending } = useCreateTransaction();
   const { toast } = useToast();
+  const { data: settings } = useSettings();
+  const currencySymbol = settings?.currencySymbol || "Ar";
 
   // Reset form when opening
   useEffect(() => {
@@ -89,7 +93,7 @@ export function TransactionDialog({
               label="Amount"
               value={amount}
               onChange={setAmount}
-              placeholder="0.00"
+              placeholder={`${currencySymbol} 0.00`}
               autoFocus
             />
 
