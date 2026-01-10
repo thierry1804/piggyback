@@ -1,0 +1,364 @@
+import { Link } from "wouter";
+import { motion } from "framer-motion";
+import { 
+  PiggyBank, 
+  Target, 
+  TrendingUp, 
+  Sparkles, 
+  ArrowRight, 
+  Check,
+  Wallet,
+  LineChart,
+  Shield
+} from "lucide-react";
+
+const features = [
+  {
+    icon: Target,
+    title: "Custom goals",
+    description: "Create custom savings goals with target amounts and deadlines."
+  },
+  {
+    icon: LineChart,
+    title: "Real-time tracking",
+    description: "Visualize your progress with intuitive charts and detailed statistics."
+  },
+  {
+    icon: Wallet,
+    title: "Simple transactions",
+    description: "Add or withdraw funds in just a few clicks. Complete history available."
+  },
+  {
+    icon: Shield,
+    title: "100% private",
+    description: "Your data stays on your device. No account required, no data shared."
+  }
+];
+
+const steps = [
+  { num: "01", title: "Create a goal", desc: "Define what you want to save for" },
+  { num: "02", title: "Add funds", desc: "Deposit at your own pace" },
+  { num: "03", title: "Track your progress", desc: "Reach your dreams" }
+];
+
+export default function Landing() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-violet-50/30 to-emerald-50/20 overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-violet-300/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-emerald-300/20 rounded-full blur-3xl animate-pulse delay-1000" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-amber-200/10 rounded-full blur-3xl" />
+      </div>
+
+      {/* Navigation */}
+      <nav className="relative z-50 px-6 py-6 max-w-7xl mx-auto">
+        <div className="flex items-center justify-between">
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center gap-3"
+          >
+            <div className="w-12 h-12 bg-gradient-to-br from-violet-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg shadow-violet-500/25">
+              <PiggyBank className="w-7 h-7 text-white" />
+            </div>
+            <span className="text-2xl font-bold text-slate-800 tracking-tight font-display">Piggyback</span>
+          </motion.div>
+          
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+          >
+            <Link 
+              href="/app" 
+              className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-full transition-all hover:shadow-xl hover:shadow-slate-900/20 hover:-translate-y-0.5"
+            >
+              Open app
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </motion.div>
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="relative z-10 px-6 pt-16 pb-24 max-w-7xl mx-auto">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="space-y-8"
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-violet-100 text-violet-700 rounded-full text-sm font-medium">
+              <Sparkles className="w-4 h-4" />
+              <span>Save smart</span>
+            </div>
+            
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-slate-900 leading-[1.1] font-display">
+              Small steps toward
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-emerald-500"> big dreams</span>
+            </h1>
+            
+            <p className="text-xl text-slate-600 max-w-lg leading-relaxed">
+              Piggyback helps you achieve your savings goals with ease. 
+              Track your progress, stay motivated, and realize your dreams.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Link 
+                href="/app"
+                className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-violet-600 to-violet-500 hover:from-violet-500 hover:to-violet-600 text-white font-bold text-lg rounded-2xl transition-all hover:shadow-2xl hover:shadow-violet-500/30 hover:-translate-y-1"
+              >
+                <PiggyBank className="w-6 h-6" />
+                Get started now
+              </Link>
+              
+              <a 
+                href="#features"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/80 backdrop-blur-sm hover:bg-white text-slate-700 font-semibold text-lg rounded-2xl border border-slate-200 transition-all hover:shadow-lg"
+              >
+                Learn more
+              </a>
+            </div>
+
+            <div className="flex items-center gap-8 pt-4">
+              <div className="flex items-center gap-2">
+                <Check className="w-5 h-5 text-emerald-500" />
+                <span className="text-slate-600">100% Free</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Check className="w-5 h-5 text-emerald-500" />
+                <span className="text-slate-600">No sign-up</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Check className="w-5 h-5 text-emerald-500" />
+                <span className="text-slate-600">Private</span>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Hero Visual */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="relative"
+          >
+            <div className="relative z-10">
+              {/* Mock App Card */}
+              <div className="bg-white rounded-3xl shadow-2xl shadow-slate-900/10 p-8 border border-slate-100">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <p className="text-xs font-bold text-violet-600 uppercase tracking-wider">Total saved</p>
+                    <p className="text-4xl font-bold text-slate-900 font-mono mt-1">$ 2,450</p>
+                  </div>
+                  <div className="w-14 h-14 bg-gradient-to-br from-violet-500 to-violet-600 rounded-2xl flex items-center justify-center">
+                    <TrendingUp className="w-7 h-7 text-white" />
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-full w-3/4 bg-gradient-to-r from-violet-500 to-emerald-400 rounded-full" />
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    {[
+                      { emoji: "🎓", name: "Education", progress: 85, color: "from-violet-500 to-violet-400" },
+                      { emoji: "🏠", name: "House", progress: 42, color: "from-emerald-500 to-emerald-400" },
+                      { emoji: "✈️", name: "Travel", progress: 67, color: "from-amber-500 to-amber-400" },
+                      { emoji: "💻", name: "Laptop", progress: 91, color: "from-rose-500 to-rose-400" }
+                    ].map((goal) => (
+                      <div key={goal.name} className="bg-slate-50 rounded-2xl p-4">
+                        <div className="text-2xl mb-2">{goal.emoji}</div>
+                        <p className="text-sm font-semibold text-slate-700">{goal.name}</p>
+                        <div className="flex items-center gap-2 mt-2">
+                          <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+                            <div 
+                              className={`h-full bg-gradient-to-r ${goal.color} rounded-full`}
+                              style={{ width: `${goal.progress}%` }}
+                            />
+                          </div>
+                          <span className="text-xs font-bold text-slate-500">{goal.progress}%</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Floating Elements */}
+              <motion.div 
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute -top-6 -right-6 bg-white rounded-2xl shadow-xl p-4 border border-slate-100"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
+                    <Check className="w-5 h-5 text-emerald-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-slate-800">Goal reached!</p>
+                    <p className="text-xs text-slate-500">Paris Trip 🎉</p>
+                  </div>
+                </div>
+              </motion.div>
+
+              <motion.div 
+                animate={{ y: [0, 10, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                className="absolute -bottom-4 -left-6 bg-white rounded-2xl shadow-xl p-4 border border-slate-100"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center text-xl">
+                    💰
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-slate-800">+$ 500</p>
+                    <p className="text-xs text-slate-500">Deposit added</p>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section id="features" className="relative z-10 px-6 py-24 bg-white/50 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-4 font-display">
+              Everything you need
+            </h2>
+            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+              Simple yet powerful tools to help you save effectively
+            </p>
+          </motion.div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {features.map((feature, index) => (
+              <motion.div
+                key={feature.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                className="bg-white rounded-3xl p-8 shadow-lg shadow-slate-900/5 border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all group"
+              >
+                <div className="w-14 h-14 bg-gradient-to-br from-violet-100 to-violet-50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <feature.icon className="w-7 h-7 text-violet-600" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-3">{feature.title}</h3>
+                <p className="text-slate-600 leading-relaxed">{feature.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="relative z-10 px-6 py-24">
+        <div className="max-w-5xl mx-auto">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-4 font-display">
+              Easy as 1, 2, 3
+            </h2>
+            <p className="text-xl text-slate-600">
+              Start saving in seconds
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {steps.map((step, index) => (
+              <motion.div
+                key={step.num}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.15 }}
+                className="relative"
+              >
+                <div className="text-7xl font-black text-violet-100 mb-4 font-display">{step.num}</div>
+                <h3 className="text-2xl font-bold text-slate-900 mb-2">{step.title}</h3>
+                <p className="text-slate-600">{step.desc}</p>
+                
+                {index < steps.length - 1 && (
+                  <div className="hidden md:block absolute top-10 right-0 translate-x-1/2">
+                    <ArrowRight className="w-8 h-8 text-violet-200" />
+                  </div>
+                )}
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="relative z-10 px-6 py-24">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          className="max-w-4xl mx-auto"
+        >
+          <div className="bg-gradient-to-br from-violet-600 via-violet-500 to-emerald-500 rounded-[2.5rem] p-12 sm:p-16 text-center relative overflow-hidden">
+            {/* Background Pattern */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-0 left-0 w-40 h-40 border border-white rounded-full -translate-x-1/2 -translate-y-1/2" />
+              <div className="absolute bottom-0 right-0 w-60 h-60 border border-white rounded-full translate-x-1/4 translate-y-1/4" />
+              <div className="absolute top-1/2 left-1/2 w-80 h-80 border border-white rounded-full -translate-x-1/2 -translate-y-1/2" />
+            </div>
+
+            <div className="relative z-10">
+              <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-3xl flex items-center justify-center mx-auto mb-8">
+                <PiggyBank className="w-10 h-10 text-white" />
+              </div>
+              
+              <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6 font-display">
+                Ready to start your savings journey?
+              </h2>
+              <p className="text-xl text-white/80 mb-10 max-w-xl mx-auto">
+                Join thousands of people achieving their financial goals with Piggyback.
+              </p>
+              
+              <Link 
+                href="/app"
+                className="inline-flex items-center gap-3 px-10 py-5 bg-white hover:bg-slate-50 text-violet-600 font-bold text-lg rounded-2xl transition-all hover:shadow-2xl hover:shadow-black/20 hover:-translate-y-1"
+              >
+                Launch the app
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Footer */}
+      <footer className="relative z-10 px-6 py-12 border-t border-slate-200/50">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-violet-600 rounded-xl flex items-center justify-center">
+              <PiggyBank className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-lg font-bold text-slate-800">Piggyback</span>
+          </div>
+          
+          <p className="text-slate-500 text-sm">
+            © {new Date().getFullYear()} Piggyback. Made with 💜 for your savings.
+          </p>
+        </div>
+      </footer>
+    </div>
+  );
+}
