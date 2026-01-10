@@ -1,8 +1,9 @@
 {
-  "name": "Piggyback - Savings Tracker",
+  "name": "Piggyback - Application d'Épargne Gratuite",
   "short_name": "Piggyback",
-  "description": "Track your savings goals with ease. 100% offline, 100% private.",
+  "description": "Atteignez vos objectifs d'épargne facilement. Application gratuite, 100% privée, sans inscription. Créez vos objectifs, suivez votre progression.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#f8fafc",
   "theme_color": "#7c3aed",
@@ -12,7 +13,7 @@
       "src": "/icons/icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
       "src": "/favicon.ico",
@@ -20,7 +21,18 @@
       "type": "image/x-icon"
     }
   ],
+  "screenshots": [
+    {
+      "src": "/og-image.svg",
+      "sizes": "1200x630",
+      "type": "image/svg+xml",
+      "form_factor": "wide",
+      "label": "Tableau de bord Piggyback"
+    }
+  ],
   "categories": ["finance", "productivity", "utilities"],
-  "lang": "en",
-  "dir": "ltr"
+  "lang": "fr",
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "related_applications": []
 }

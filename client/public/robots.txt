@@ -1,0 +1,9 @@
+# Piggyback - Robots.txt
+# Application d'épargne personnelle
+
+User-agent: *
+Allow: /
+Disallow: /app/
+
+# Sitemap
+Sitemap: https://piggyback.app/sitemap.xml
