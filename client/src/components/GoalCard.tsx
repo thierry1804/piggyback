@@ -45,7 +45,7 @@ export function GoalCard({ goal, onQuickAdd }: GoalCardProps) {
         styles.border
       )}
     >
-      <Link href={`/goal/${goal.id}`} className="absolute inset-0 z-10" aria-label={`View ${goal.name} details`} />
+      <Link href={`/app/goal/${goal.id}`} className="absolute inset-0 z-10" aria-label={`View ${goal.name} details`} />
       
       <div className="relative z-20 flex justify-between items-start mb-4 pointer-events-none">
         <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center text-2xl", styles.bg)}>

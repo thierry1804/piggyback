@@ -31,7 +31,7 @@ import { cn } from "@/lib/utils";
 import { useSettings } from "@/hooks/use-settings";
 
 export default function GoalDetails() {
-  const [, params] = useRoute("/goal/:id");
+  const [, params] = useRoute("/app/goal/:id");
   const id = parseInt(params?.id || "0");
   const { data: goal, isLoading, isError } = useGoal(id);
   const { mutate: deleteGoal } = useDeleteGoal();
@@ -56,7 +56,7 @@ export default function GoalDetails() {
       <div className="min-h-screen flex flex-col items-center justify-center p-4">
         <AlertCircle className="w-12 h-12 text-destructive mb-4 opacity-20" />
         <h1 className="text-2xl font-bold mb-2">Goal not found</h1>
-        <Link href="/" className="text-primary hover:underline font-medium">Return home</Link>
+        <Link href="/app" className="text-primary hover:underline font-medium">Return home</Link>
       </div>
     );
   }
@@ -65,7 +65,7 @@ export default function GoalDetails() {
     deleteGoal(id, {
       onSuccess: () => {
         // useDeleteGoal handles cache invalidation
-        window.location.href = "/";
+        window.location.href = "/app";
       }
     });
   };
@@ -91,7 +91,7 @@ export default function GoalDetails() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         {/* Nav */}
         <div className="flex items-center justify-between mb-8">
-          <Link href="/" className="
+          <Link href="/app" className="
             inline-flex items-center gap-2 text-muted-foreground font-medium
             hover:text-foreground transition-colors px-3 py-2 rounded-lg hover:bg-muted/50
           ">

@@ -55,7 +55,7 @@ export default function Settings() {
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
       <header className="pt-12 pb-8 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
-        <Link href="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6">
+        <Link href="/app" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6">
           <ArrowLeft className="w-5 h-5" />
           <span className="font-medium">Back to Dashboard</span>
         </Link>
@@ -110,7 +110,7 @@ export default function Settings() {
           {/* Submit Button */}
           <div className="flex justify-end gap-3">
             <Link
-              href="/"
+              href="/app"
               className="px-6 py-3 rounded-xl font-semibold text-foreground/70 hover:bg-muted transition-colors"
             >
               Cancel

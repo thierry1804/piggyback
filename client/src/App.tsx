@@ -13,8 +13,8 @@ function Router() {
     <Switch>
       <Route path="/" component={Landing} />
       <Route path="/app" component={Dashboard} />
-      <Route path="/goal/:id" component={GoalDetails} />
-      <Route path="/settings" component={Settings} />
+      <Route path="/app/goal/:id" component={GoalDetails} />
+      <Route path="/app/settings" component={Settings} />
       <Route component={NotFound} />
     </Switch>
   );
