@@ -4,6 +4,7 @@ import { ProgressBar } from "./ProgressBar";
 import type { Goal } from "@/lib/localStorage";
 import { cn, calculateSavingsAdvice } from "@/lib/utils";
 import { useSettings } from "@/hooks/use-settings";
+import { useLanguage } from "@/hooks/use-language";
 import { format, isPast, differenceInDays } from "date-fns";
 
 interface GoalCardProps {
@@ -25,6 +26,7 @@ const colorStyles: Record<string, { bg: string, text: string, border: string }> 
 export function GoalCard({ goal, onQuickAdd }: GoalCardProps) {
   const styles = colorStyles[goal.color || "blue"];
   const { data: settings } = useSettings();
+  const { t } = useLanguage();
   const currencySymbol = settings?.currencySymbol || "Ar";
   
   const deadlineDate = goal.deadline ? new Date(goal.deadline) : null;
@@ -61,7 +63,7 @@ export function GoalCard({ goal, onQuickAdd }: GoalCardProps) {
             "bg-white border border-border text-muted-foreground",
             "hover:bg-primary hover:text-white hover:border-primary shadow-sm"
           )}
-          aria-label="Quick add transaction"
+          aria-label={t.goalCard.quickAdd}
         >
           <Plus className="w-5 h-5" />
         </button>
@@ -92,12 +94,12 @@ export function GoalCard({ goal, onQuickAdd }: GoalCardProps) {
               <Calendar className="w-3.5 h-3.5" />
               <span>
                 {isOverdue 
-                  ? `Overdue by ${Math.abs(daysRemaining || 0)} days`
+                  ? `${t.goalCard.overdueBy} ${Math.abs(daysRemaining || 0)} ${t.goalCard.days}`
                   : daysRemaining === 0
-                  ? "Due today"
+                  ? t.goalCard.dueToday
                   : daysRemaining === 1
-                  ? "Due tomorrow"
-                  : `Due in ${daysRemaining} days`
+                  ? t.goalCard.dueTomorrow
+                  : `${t.goalCard.dueIn} ${daysRemaining} ${t.goalCard.days}`
                 }
               </span>
               <span className="text-muted-foreground/60">

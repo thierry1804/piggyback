@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { useSettings } from "@/hooks/use-settings";
+import { useLanguage } from "@/hooks/use-language";
 
 export default function GoalDetails() {
   const [, params] = useRoute("/app/goal/:id");
@@ -36,6 +37,7 @@ export default function GoalDetails() {
   const { data: goal, isLoading, isError } = useGoal(id);
   const { mutate: deleteGoal } = useDeleteGoal();
   const { data: settings } = useSettings();
+  const { t } = useLanguage();
   const currencySymbol = settings?.currencySymbol || "Ar";
   
   const [transactionModal, setTransactionModal] = useState<{
@@ -55,8 +57,8 @@ export default function GoalDetails() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4">
         <AlertCircle className="w-12 h-12 text-destructive mb-4 opacity-20" />
-        <h1 className="text-2xl font-bold mb-2">Goal not found</h1>
-        <Link href="/app" className="text-primary hover:underline font-medium">Return home</Link>
+        <h1 className="text-2xl font-bold mb-2">{t.goalDetails.goalNotFound}</h1>
+        <Link href="/app" className="text-primary hover:underline font-medium">{t.goalDetails.returnHome}</Link>
       </div>
     );
   }
@@ -96,7 +98,7 @@ export default function GoalDetails() {
             hover:text-foreground transition-colors px-3 py-2 rounded-lg hover:bg-muted/50
           ">
             <ArrowLeft className="w-5 h-5" />
-            Back to Dashboard
+            {t.goalDetails.backToDashboard}
           </Link>
 
           <AlertDialog>
@@ -107,15 +109,15 @@ export default function GoalDetails() {
             </AlertDialogTrigger>
             <AlertDialogContent className="rounded-2xl">
               <AlertDialogHeader>
-                <AlertDialogTitle>Delete this goal?</AlertDialogTitle>
+                <AlertDialogTitle>{t.goalDetails.deleteGoal}</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This will permanently delete "{goal.name}" and all its transaction history. This action cannot be undone.
+                  {t.goalDetails.deleteWarning} "{goal.name}" {t.goalDetails.deleteWarning2}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                <AlertDialogCancel className="rounded-xl">{t.goalDetails.cancel}</AlertDialogCancel>
                 <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90 rounded-xl">
-                  Delete Goal
+                  {t.goalDetails.deleteButton}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -139,7 +141,7 @@ export default function GoalDetails() {
                   {currencySymbol}{(goal.currentAmount / 100).toLocaleString()}
                 </span>
                 <span className="text-lg sm:text-xl text-muted-foreground font-medium">
-                  of {currencySymbol}{(goal.targetAmount / 100).toLocaleString()}
+                  {t.common.of} {currencySymbol}{(goal.targetAmount / 100).toLocaleString()}
                 </span>
               </div>
               
@@ -161,13 +163,13 @@ export default function GoalDetails() {
                       <Calendar className="w-4 h-4" />
                       <span>
                         {isOverdue 
-                          ? `Overdue by ${Math.abs(daysRemaining || 0)} days`
+                          ? `${t.goalCard.overdueBy} ${Math.abs(daysRemaining || 0)} ${t.goalCard.days}`
                           : daysRemaining === 0
-                          ? "Due today"
+                          ? t.goalCard.dueToday
                           : daysRemaining === 1
-                          ? "Due tomorrow"
+                          ? t.goalCard.dueTomorrow
                           : daysRemaining !== null
-                          ? `Due in ${daysRemaining} days`
+                          ? `${t.goalCard.dueIn} ${daysRemaining} ${t.goalCard.days}`
                           : ""
                         }
                       </span>
@@ -178,7 +180,7 @@ export default function GoalDetails() {
                   )}
                 </div>
                 <div className="text-right font-medium text-xs sm:text-sm text-muted-foreground">
-                  {percentage.toFixed(1)}% Completed
+                  {percentage.toFixed(1)}% {t.goalDetails.completed}
                 </div>
               </div>
               
@@ -187,7 +189,7 @@ export default function GoalDetails() {
                   <div className="flex items-start gap-3">
                     <Lightbulb className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                     <div className="flex-1">
-                      <p className="text-sm font-semibold text-foreground mb-1">💡 Conseil d'épargne</p>
+                      <p className="text-sm font-semibold text-foreground mb-1">{t.goalDetails.savingsTip}</p>
                       <p className="text-sm text-foreground/80 leading-relaxed">
                         {savingsAdvice.advice}
                       </p>
@@ -204,13 +206,13 @@ export default function GoalDetails() {
               onClick={() => setTransactionModal({ open: true, type: "deposit" })}
               className="flex-1 py-3.5 sm:py-4 px-6 rounded-xl sm:rounded-2xl bg-primary text-white font-bold text-base sm:text-lg shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
             >
-              Add Savings
+              {t.goalDetails.addSavings}
             </button>
             <button
               onClick={() => setTransactionModal({ open: true, type: "withdraw" })}
               className="flex-1 py-3.5 sm:py-4 px-6 rounded-xl sm:rounded-2xl bg-white border-2 border-border text-foreground font-bold text-base sm:text-lg hover:bg-muted/30 hover:border-muted-foreground/20 transition-all duration-200"
             >
-              Withdraw
+              {t.goalDetails.withdraw}
             </button>
           </div>
         </div>
@@ -219,13 +221,13 @@ export default function GoalDetails() {
         <section>
           <h2 className="text-xl font-bold mb-6 font-display flex items-center gap-2">
             <Calendar className="w-5 h-5 text-muted-foreground" />
-            History
+            {t.goalDetails.history}
           </h2>
 
           <div className="bg-white rounded-3xl border border-border/50 shadow-sm overflow-hidden">
             {transactions.length === 0 ? (
               <div className="p-12 text-center text-muted-foreground">
-                No transactions yet. Start saving today!
+                {t.goalDetails.noTransactions}
               </div>
             ) : (
               <ul className="divide-y divide-border/50">
@@ -246,7 +248,7 @@ export default function GoalDetails() {
                       </div>
                       <div>
                         <p className="font-medium text-foreground">
-                          {tx.amount > 0 ? "Deposit" : "Withdrawal"}
+                          {tx.amount > 0 ? t.goalDetails.deposit : t.goalDetails.withdrawal}
                           {tx.note && <span className="text-muted-foreground font-normal"> • {tx.note}</span>}
                         </p>
                         <p className="text-xs text-muted-foreground">

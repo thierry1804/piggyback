@@ -9,39 +9,56 @@ import {
   Check,
   Wallet,
   LineChart,
-  Shield
+  Shield,
+  Globe
 } from "lucide-react";
-
-const features = [
-  {
-    icon: Target,
-    title: "Custom goals",
-    description: "Create custom savings goals with target amounts and deadlines."
-  },
-  {
-    icon: LineChart,
-    title: "Real-time tracking",
-    description: "Visualize your progress with intuitive charts and detailed statistics."
-  },
-  {
-    icon: Wallet,
-    title: "Simple transactions",
-    description: "Add or withdraw funds in just a few clicks. Complete history available."
-  },
-  {
-    icon: Shield,
-    title: "100% private",
-    description: "Your data stays on your device. No account required, no data shared."
-  }
-];
-
-const steps = [
-  { num: "01", title: "Create a goal", desc: "Define what you want to save for" },
-  { num: "02", title: "Add funds", desc: "Deposit at your own pace" },
-  { num: "03", title: "Track your progress", desc: "Reach your dreams" }
-];
+import { useLanguage } from "@/hooks/use-language";
+import { useSettings, useUpdateSettings } from "@/hooks/use-settings";
+import { languages, type Language } from "@/lib/i18n";
+import { useState } from "react";
 
 export default function Landing() {
+  const { t, language } = useLanguage();
+  const { data: settings } = useSettings();
+  const { mutate: updateSettings } = useUpdateSettings();
+  const [showLangMenu, setShowLangMenu] = useState(false);
+
+  const handleLanguageChange = (lang: Language) => {
+    if (settings) {
+      updateSettings({ ...settings, language: lang });
+    }
+    setShowLangMenu(false);
+  };
+
+  const features = [
+    {
+      icon: Target,
+      title: t.landing.featureGoalsTitle,
+      description: t.landing.featureGoalsDesc
+    },
+    {
+      icon: LineChart,
+      title: t.landing.featureTrackingTitle,
+      description: t.landing.featureTrackingDesc
+    },
+    {
+      icon: Wallet,
+      title: t.landing.featureTransactionsTitle,
+      description: t.landing.featureTransactionsDesc
+    },
+    {
+      icon: Shield,
+      title: t.landing.featurePrivateTitle,
+      description: t.landing.featurePrivateDesc
+    }
+  ];
+
+  const steps = [
+    { num: "01", title: t.landing.step1Title, desc: t.landing.step1Desc },
+    { num: "02", title: t.landing.step2Title, desc: t.landing.step2Desc },
+    { num: "03", title: t.landing.step3Title, desc: t.landing.step3Desc }
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-violet-50/30 to-emerald-50/20 overflow-hidden">
       {/* Animated Background Elements */}
@@ -68,12 +85,41 @@ export default function Landing() {
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
+            className="flex items-center gap-3"
           >
+            {/* Language Selector */}
+            <div className="relative">
+              <button
+                onClick={() => setShowLangMenu(!showLangMenu)}
+                className="flex items-center gap-2 px-3 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 hover:bg-white transition-all text-sm font-medium text-slate-700"
+              >
+                <Globe className="w-4 h-4" />
+                <span>{languages.find(l => l.code === language)?.flag}</span>
+              </button>
+              
+              {showLangMenu && (
+                <div className="absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50">
+                  {languages.map((lang) => (
+                    <button
+                      key={lang.code}
+                      onClick={() => handleLanguageChange(lang.code)}
+                      className={`w-full flex items-center gap-3 px-4 py-2 text-left hover:bg-slate-50 transition-colors ${
+                        language === lang.code ? 'bg-violet-50 text-violet-700' : 'text-slate-700'
+                      }`}
+                    >
+                      <span>{lang.flag}</span>
+                      <span className="font-medium">{lang.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <Link 
               href="/app" 
               className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-full transition-all hover:shadow-xl hover:shadow-slate-900/20 hover:-translate-y-0.5"
             >
-              Open app
+              {t.landing.openApp}
               <ArrowRight className="w-4 h-4" />
             </Link>
           </motion.div>
@@ -91,17 +137,16 @@ export default function Landing() {
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-violet-100 text-violet-700 rounded-full text-sm font-medium">
               <Sparkles className="w-4 h-4" />
-              <span>Save smart</span>
+              <span>{t.landing.tagline}</span>
             </div>
             
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-slate-900 leading-[1.1] font-display">
-              Small steps toward
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-emerald-500"> big dreams</span>
+              {t.landing.heroTitle}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-emerald-500"> {t.landing.heroTitleHighlight}</span>
             </h1>
             
             <p className="text-xl text-slate-600 max-w-lg leading-relaxed">
-              Piggyback helps you achieve your savings goals with ease. 
-              Track your progress, stay motivated, and realize your dreams.
+              {t.landing.heroDescription}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
@@ -110,29 +155,29 @@ export default function Landing() {
                 className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-violet-600 to-violet-500 hover:from-violet-500 hover:to-violet-600 text-white font-bold text-lg rounded-2xl transition-all hover:shadow-2xl hover:shadow-violet-500/30 hover:-translate-y-1"
               >
                 <PiggyBank className="w-6 h-6" />
-                Get started now
+                {t.landing.getStarted}
               </Link>
               
               <a 
                 href="#features"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/80 backdrop-blur-sm hover:bg-white text-slate-700 font-semibold text-lg rounded-2xl border border-slate-200 transition-all hover:shadow-lg"
               >
-                Learn more
+                {t.landing.learnMore}
               </a>
             </div>
 
             <div className="flex items-center gap-8 pt-4">
               <div className="flex items-center gap-2">
                 <Check className="w-5 h-5 text-emerald-500" />
-                <span className="text-slate-600">100% Free</span>
+                <span className="text-slate-600">{t.landing.free}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Check className="w-5 h-5 text-emerald-500" />
-                <span className="text-slate-600">No sign-up</span>
+                <span className="text-slate-600">{t.landing.noSignup}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Check className="w-5 h-5 text-emerald-500" />
-                <span className="text-slate-600">Private</span>
+                <span className="text-slate-600">{t.landing.private}</span>
               </div>
             </div>
           </motion.div>
@@ -149,7 +194,7 @@ export default function Landing() {
               <div className="bg-white rounded-3xl shadow-2xl shadow-slate-900/10 p-8 border border-slate-100">
                 <div className="flex items-center justify-between mb-6">
                   <div>
-                    <p className="text-xs font-bold text-violet-600 uppercase tracking-wider">Total saved</p>
+                    <p className="text-xs font-bold text-violet-600 uppercase tracking-wider">{t.landing.totalSaved}</p>
                     <p className="text-4xl font-bold text-slate-900 font-mono mt-1">$ 2,450</p>
                   </div>
                   <div className="w-14 h-14 bg-gradient-to-br from-violet-500 to-violet-600 rounded-2xl flex items-center justify-center">
@@ -164,9 +209,9 @@ export default function Landing() {
                   
                   <div className="grid grid-cols-2 gap-4">
                     {[
-                      { emoji: "🎓", name: "Education", progress: 85, color: "from-violet-500 to-violet-400" },
-                      { emoji: "🏠", name: "House", progress: 42, color: "from-emerald-500 to-emerald-400" },
-                      { emoji: "✈️", name: "Travel", progress: 67, color: "from-amber-500 to-amber-400" },
+                      { emoji: "🎓", name: t.landing.education, progress: 85, color: "from-violet-500 to-violet-400" },
+                      { emoji: "🏠", name: t.landing.house, progress: 42, color: "from-emerald-500 to-emerald-400" },
+                      { emoji: "✈️", name: t.landing.travel, progress: 67, color: "from-amber-500 to-amber-400" },
                       { emoji: "💻", name: "Laptop", progress: 91, color: "from-rose-500 to-rose-400" }
                     ].map((goal) => (
                       <div key={goal.name} className="bg-slate-50 rounded-2xl p-4">
@@ -198,8 +243,8 @@ export default function Landing() {
                     <Check className="w-5 h-5 text-emerald-600" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-slate-800">Goal reached!</p>
-                    <p className="text-xs text-slate-500">Paris Trip 🎉</p>
+                    <p className="text-sm font-bold text-slate-800">{t.landing.goalReached}</p>
+                    <p className="text-xs text-slate-500">{t.landing.parisTrip}</p>
                   </div>
                 </div>
               </motion.div>
@@ -215,7 +260,7 @@ export default function Landing() {
                   </div>
                   <div>
                     <p className="text-sm font-bold text-slate-800">+$ 500</p>
-                    <p className="text-xs text-slate-500">Deposit added</p>
+                    <p className="text-xs text-slate-500">{t.landing.depositAdded}</p>
                   </div>
                 </div>
               </motion.div>
@@ -234,10 +279,10 @@ export default function Landing() {
             className="text-center mb-16"
           >
             <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-4 font-display">
-              Everything you need
+              {t.landing.featuresTitle}
             </h2>
             <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-              Simple yet powerful tools to help you save effectively
+              {t.landing.featuresSubtitle}
             </p>
           </motion.div>
 
@@ -272,10 +317,10 @@ export default function Landing() {
             className="text-center mb-16"
           >
             <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-4 font-display">
-              Easy as 1, 2, 3
+              {t.landing.stepsTitle}
             </h2>
             <p className="text-xl text-slate-600">
-              Start saving in seconds
+              {t.landing.stepsSubtitle}
             </p>
           </motion.div>
 
@@ -326,17 +371,17 @@ export default function Landing() {
               </div>
               
               <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6 font-display">
-                Ready to start your savings journey?
+                {t.landing.ctaTitle}
               </h2>
               <p className="text-xl text-white/80 mb-10 max-w-xl mx-auto">
-                Join thousands of people achieving their financial goals with Piggyback.
+                {t.landing.ctaDescription}
               </p>
               
               <Link 
                 href="/app"
                 className="inline-flex items-center gap-3 px-10 py-5 bg-white hover:bg-slate-50 text-violet-600 font-bold text-lg rounded-2xl transition-all hover:shadow-2xl hover:shadow-black/20 hover:-translate-y-1"
               >
-                Launch the app
+                {t.landing.launchApp}
                 <ArrowRight className="w-5 h-5" />
               </Link>
             </div>
@@ -355,7 +400,7 @@ export default function Landing() {
           </div>
           
           <p className="text-slate-500 text-sm">
-            © {new Date().getFullYear()} Piggyback. Made with 💜 for your savings.
+            © {new Date().getFullYear()} Piggyback. {t.landing.footerText}
           </p>
         </div>
       </footer>

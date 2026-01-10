@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useCreateGoal } from "@/hooks/use-goals";
 import { useSettings } from "@/hooks/use-settings";
+import { useLanguage } from "@/hooks/use-language";
 import { CurrencyInput } from "./CurrencyInput";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -25,6 +26,7 @@ export function CreateGoalDialog() {
   const [color, setColor] = useState("blue");
   const [deadline, setDeadline] = useState<string>("");
   const { data: settings } = useSettings();
+  const { t } = useLanguage();
   const currencyCode = settings?.currencyCode || "MGA";
   const currencySymbol = settings?.currencySymbol || "Ar";
   
@@ -62,7 +64,7 @@ export function CreateGoalDialog() {
         },
         onError: (err) => {
           toast({
-            title: "Error",
+            title: t.settings.error,
             description: err.message,
             variant: "destructive",
           });
@@ -82,7 +84,7 @@ export function CreateGoalDialog() {
           transition-all duration-200 ease-out w-full md:w-auto
         ">
           <Plus className="w-5 h-5" />
-          <span>New Goal</span>
+          <span>{t.dialogs.createGoal}</span>
         </button>
       </DialogTrigger>
       
@@ -97,24 +99,24 @@ export function CreateGoalDialog() {
         
         <div className="p-5 sm:p-6 overflow-y-auto custom-scrollbar">
           <DialogHeader className="mb-6">
-            <DialogTitle className="text-2xl font-display font-bold">Create New Goal</DialogTitle>
-            <DialogDescription>What are you saving up for?</DialogDescription>
+            <DialogTitle className="text-2xl font-display font-bold">{t.dialogs.createGoal}</DialogTitle>
+            <DialogDescription>{t.dialogs.createGoalDescription}</DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-6 pb-2">
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground/80 font-display">Goal Name</label>
+              <label className="text-sm font-medium text-foreground/80 font-display">{t.dialogs.goalName}</label>
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. New Laptop"
+                placeholder={t.dialogs.goalNamePlaceholder}
                 className="w-full px-4 py-3 rounded-xl bg-background border-2 border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
                 autoFocus
               />
             </div>
 
             <CurrencyInput
-              label="Target Amount"
+              label={t.dialogs.targetAmount}
               value={targetAmount}
               onChange={setTargetAmount}
               placeholder={`${currencySymbol} 1000.00`}
@@ -122,7 +124,7 @@ export function CreateGoalDialog() {
 
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-foreground/80 font-display">
-                Deadline (Optional)
+                {t.dialogs.deadline} {t.dialogs.deadlineOptional}
               </label>
               <input
                 type="date"
@@ -131,11 +133,10 @@ export function CreateGoalDialog() {
                 min={new Date().toISOString().split('T')[0]}
                 className="w-full px-4 py-3 rounded-xl bg-background border-2 border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
               />
-              <p className="text-xs text-muted-foreground">Set a target date for this goal (optional)</p>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground/80 font-display">Pick an Icon</label>
+              <label className="text-sm font-medium text-foreground/80 font-display">{t.dialogs.icon}</label>
               <div className="flex flex-wrap gap-2">
                 {ICONS.map((emoji) => (
                   <button
@@ -156,7 +157,7 @@ export function CreateGoalDialog() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground/80 font-display">Theme Color</label>
+              <label className="text-sm font-medium text-foreground/80 font-display">{t.dialogs.color}</label>
               <div className="flex gap-3">
                 {COLORS.map((theme) => (
                   <button
@@ -180,7 +181,7 @@ export function CreateGoalDialog() {
                 onClick={() => setIsOpen(false)}
                 className="flex-1 px-4 py-3 rounded-xl font-semibold text-foreground/70 hover:bg-muted transition-colors"
               >
-                Cancel
+                {t.goalDetails.cancel}
               </button>
               <button
                 type="submit"
@@ -192,7 +193,7 @@ export function CreateGoalDialog() {
                   transition-all duration-200
                 "
               >
-                {isPending ? "Creating..." : "Create Goal"}
+                {isPending ? t.dialogs.creating : t.dialogs.create}
               </button>
             </div>
           </form>

@@ -8,10 +8,12 @@ import { Loader2, TrendingUp, PiggyBank, Settings as SettingsIcon } from "lucide
 import { motion } from "framer-motion";
 import type { Goal } from "@/lib/localStorage";
 import { useSettings } from "@/hooks/use-settings";
+import { useLanguage } from "@/hooks/use-language";
 
 export default function Dashboard() {
   const { data: goals, isLoading, isError } = useGoals();
   const { data: settings } = useSettings();
+  const { t } = useLanguage();
   const [quickAddGoal, setQuickAddGoal] = useState<Goal | null>(null);
 
   if (isLoading) {
@@ -25,12 +27,12 @@ export default function Dashboard() {
   if (isError) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
-        <p className="text-destructive font-medium text-lg mb-4">Something went wrong fetching your goals.</p>
+        <p className="text-destructive font-medium text-lg mb-4">{t.dashboard.somethingWrong}</p>
         <button 
           onClick={() => window.location.reload()} 
           className="px-4 py-2 bg-primary text-white rounded-lg"
         >
-          Retry
+          {t.dashboard.retry}
         </button>
       </div>
     );
@@ -48,7 +50,7 @@ export default function Dashboard() {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <h1 className="text-4xl sm:text-5xl font-extrabold text-foreground mb-2">Piggyback</h1>
-            <p className="text-lg text-muted-foreground font-medium">Small steps to big dreams.</p>
+            <p className="text-lg text-muted-foreground font-medium">{t.dashboard.tagline}</p>
           </div>
           <div className="flex items-center gap-3">
             <Link
@@ -56,7 +58,7 @@ export default function Dashboard() {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-foreground/70 hover:text-foreground hover:bg-muted transition-colors"
             >
               <SettingsIcon className="w-5 h-5" />
-              <span className="hidden sm:inline">Settings</span>
+              <span className="hidden sm:inline">{t.dashboard.settings}</span>
             </Link>
             <CreateGoalDialog />
           </div>
@@ -76,7 +78,7 @@ export default function Dashboard() {
           </div>
           
           <div className="relative z-10">
-            <p className="text-xs sm:text-sm font-bold text-primary/80 tracking-wider uppercase mb-1 font-display">Total Savings</p>
+            <p className="text-xs sm:text-sm font-bold text-primary/80 tracking-wider uppercase mb-1 font-display">{t.dashboard.totalSavings}</p>
             <div className="flex items-baseline gap-2 mb-4">
               <span className="text-4xl sm:text-6xl font-bold text-foreground font-mono tracking-tight break-all">
                 {defaultCurrency}{(totalSaved / 100).toLocaleString()}
@@ -85,8 +87,8 @@ export default function Dashboard() {
             
             <div className="max-w-md space-y-2">
               <div className="flex justify-between text-xs sm:text-sm font-medium text-muted-foreground gap-2">
-                <span>Progress</span>
-                <span className="text-right">{progressPercentage.toFixed(1)}% of {defaultCurrency}{(totalTarget / 100).toLocaleString()}</span>
+                <span>{t.dashboard.progress}</span>
+                <span className="text-right">{progressPercentage.toFixed(1)}% {t.common.of} {defaultCurrency}{(totalTarget / 100).toLocaleString()}</span>
               </div>
               <div className="h-2.5 sm:h-3 w-full bg-background rounded-full overflow-hidden border border-primary/10">
                 <div 
@@ -102,7 +104,7 @@ export default function Dashboard() {
         <section>
           <div className="flex items-center gap-2 mb-6">
             <TrendingUp className="w-5 h-5 text-muted-foreground" />
-            <h2 className="text-xl font-bold text-foreground">Your Goals</h2>
+            <h2 className="text-xl font-bold text-foreground">{t.dashboard.yourGoals}</h2>
           </div>
 
           {goals?.length === 0 ? (
@@ -110,8 +112,8 @@ export default function Dashboard() {
               <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
                 🌱
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-2">No goals yet</h3>
-              <p className="text-muted-foreground max-w-xs mx-auto mb-6">Create your first savings goal to start tracking your progress.</p>
+              <h3 className="text-xl font-bold text-foreground mb-2">{t.dashboard.noGoalsTitle}</h3>
+              <p className="text-muted-foreground max-w-xs mx-auto mb-6">{t.dashboard.noGoalsDescription}</p>
               <CreateGoalDialog />
             </div>
           ) : (

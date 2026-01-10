@@ -1,40 +1,45 @@
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, Globe } from "lucide-react";
 import { useSettings, useUpdateSettings } from "@/hooks/use-settings";
+import { useLanguage } from "@/hooks/use-language";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { languages, type Language } from "@/lib/i18n";
 
 export default function Settings() {
   const { data: settings, isLoading } = useSettings();
   const { mutate: updateSettings, isPending } = useUpdateSettings();
+  const { t } = useLanguage();
   const { toast } = useToast();
   
   const [currencyCode, setCurrencyCode] = useState(settings?.currencyCode || "MGA");
   const [currencySymbol, setCurrencySymbol] = useState(settings?.currencySymbol || "Ar");
+  const [language, setLanguage] = useState<Language>(settings?.language || "en");
 
   // Mettre à jour les états quand les settings changent
   useEffect(() => {
     if (settings) {
       setCurrencyCode(settings.currencyCode);
       setCurrencySymbol(settings.currencySymbol);
+      setLanguage(settings.language || "en");
     }
   }, [settings]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     updateSettings(
-      { currencyCode, currencySymbol },
+      { currencyCode, currencySymbol, language },
       {
         onSuccess: () => {
           toast({
-            title: "Settings saved!",
-            description: "Your currency preferences have been updated.",
+            title: t.settings.savedTitle,
+            description: t.settings.savedDescription,
           });
         },
         onError: (err) => {
           toast({
-            title: "Error",
+            title: t.settings.error,
             description: err.message,
             variant: "destructive",
           });
@@ -57,27 +62,58 @@ export default function Settings() {
       <header className="pt-12 pb-8 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
         <Link href="/app" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6">
           <ArrowLeft className="w-5 h-5" />
-          <span className="font-medium">Back to Dashboard</span>
+          <span className="font-medium">{t.settings.backToDashboard}</span>
         </Link>
         <div>
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-foreground mb-2">Settings</h1>
-          <p className="text-lg text-muted-foreground font-medium">Manage your application preferences</p>
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-foreground mb-2">{t.settings.title}</h1>
+          <p className="text-lg text-muted-foreground font-medium">{t.settings.subtitle}</p>
         </div>
       </header>
 
       <main className="px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Language Settings */}
+          <div className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-xl shadow-black/5 border border-border/50">
+            <div className="flex items-center gap-3 mb-2">
+              <Globe className="w-6 h-6 text-primary" />
+              <h2 className="text-2xl font-bold text-foreground font-display">{t.settings.language}</h2>
+            </div>
+            <p className="text-muted-foreground mb-6">
+              {t.settings.languageDescription}
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {languages.map((lang) => (
+                <button
+                  key={lang.code}
+                  type="button"
+                  onClick={() => setLanguage(lang.code)}
+                  className={`
+                    flex items-center gap-3 p-4 rounded-xl border-2 transition-all
+                    ${language === lang.code 
+                      ? 'border-primary bg-primary/5 ring-4 ring-primary/10' 
+                      : 'border-border hover:border-primary/50 hover:bg-muted/30'
+                    }
+                  `}
+                >
+                  <span className="text-2xl">{lang.flag}</span>
+                  <span className="font-semibold text-foreground">{lang.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Currency Settings */}
           <div className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-xl shadow-black/5 border border-border/50">
-            <h2 className="text-2xl font-bold text-foreground mb-2 font-display">Currency</h2>
+            <h2 className="text-2xl font-bold text-foreground mb-2 font-display">{t.settings.currency}</h2>
             <p className="text-muted-foreground mb-6">
-              Set your default currency. This will be used throughout the application.
+              {t.settings.currencyDescription}
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-foreground/80 font-display">
-                  Currency Code
+                  {t.settings.currencyCode}
                 </label>
                 <input
                   type="text"
@@ -92,7 +128,7 @@ export default function Settings() {
 
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-foreground/80 font-display">
-                  Currency Symbol
+                  {t.settings.currencySymbol}
                 </label>
                 <input
                   type="text"
@@ -113,7 +149,7 @@ export default function Settings() {
               href="/app"
               className="px-6 py-3 rounded-xl font-semibold text-foreground/70 hover:bg-muted transition-colors"
             >
-              Cancel
+              {t.settings.cancelButton}
             </Link>
             <button
               type="submit"
@@ -123,12 +159,12 @@ export default function Settings() {
               {isPending ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Saving...
+                  {t.settings.saving}
                 </>
               ) : (
                 <>
                   <Save className="w-4 h-4" />
-                  Save Settings
+                  {t.settings.saveButton}
                 </>
               )}
             </button>

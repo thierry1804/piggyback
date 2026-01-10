@@ -24,6 +24,7 @@ export interface Transaction {
 export interface Settings {
   currencyCode: string;
   currencySymbol: string;
+  language: "en" | "fr" | "mg";
 }
 
 const STORAGE_KEYS = {
@@ -134,16 +135,24 @@ class LocalStorageService {
       const defaultSettings: Settings = {
         currencyCode: 'MGA',
         currencySymbol: 'Ar',
+        language: 'en',
       };
       this.setSettings(defaultSettings);
       return defaultSettings;
     }
     try {
-      return JSON.parse(data) as Settings;
+      const settings = JSON.parse(data) as Settings;
+      // Ajouter la langue par défaut si elle n'existe pas
+      if (!settings.language) {
+        settings.language = 'en';
+        this.setSettings(settings);
+      }
+      return settings;
     } catch {
       const defaultSettings: Settings = {
         currencyCode: 'MGA',
         currencySymbol: 'Ar',
+        language: 'en',
       };
       this.setSettings(defaultSettings);
       return defaultSettings;

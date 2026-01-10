@@ -3,6 +3,7 @@ import { X } from "lucide-react";
 import { useCreateTransaction } from "@/hooks/use-transactions";
 import { useGoal } from "@/hooks/use-goals";
 import { useSettings } from "@/hooks/use-settings";
+import { useLanguage } from "@/hooks/use-language";
 import { CurrencyInput } from "./CurrencyInput";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -27,6 +28,7 @@ export function TransactionDialog({
   const { mutate, isPending } = useCreateTransaction();
   const { toast } = useToast();
   const { data: settings } = useSettings();
+  const { t } = useLanguage();
   const currencySymbol = settings?.currencySymbol || "Ar";
 
   // Reset form when opening
@@ -52,16 +54,15 @@ export function TransactionDialog({
       },
       {
         onSuccess: (data) => {
-          // Use a generic placeholder or fetch symbol if needed, but for now we'll just use the amount
           toast({
-            title: type === "deposit" ? "Saved!" : "Withdrawn",
-            description: `Successfully ${type === "deposit" ? "added" : "withdrew"} amount`,
+            title: type === "deposit" ? t.goalDetails.deposit : t.goalDetails.withdrawal,
+            description: `${type === "deposit" ? "+" : "-"}${currencySymbol}${(Math.abs(amount) / 100).toLocaleString()}`,
           });
           onClose();
         },
         onError: (err) => {
           toast({
-            title: "Error",
+            title: t.settings.error,
             description: err.message,
             variant: "destructive",
           });
@@ -80,17 +81,16 @@ export function TransactionDialog({
         <div className="p-5 sm:p-6">
           <DialogHeader className="mb-6">
             <DialogTitle className="text-2xl font-display font-bold">
-              {isDeposit ? "Add Savings" : "Withdraw Funds"}
+              {isDeposit ? t.dialogs.addTransaction : t.dialogs.withdrawFrom} {goalName}
             </DialogTitle>
             <DialogDescription>
-              {isDeposit ? "Great job! Keep the momentum going." : "Need to take some out? No worries."}
-              {goalName && <span className="block mt-1 font-medium text-foreground">For: {goalName}</span>}
+              {goalName && <span className="block mt-1 font-medium text-foreground">{goalName}</span>}
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <CurrencyInput
-              label="Amount"
+              label={t.dialogs.amount}
               value={amount}
               onChange={setAmount}
               placeholder={`${currencySymbol} 0.00`}
@@ -99,13 +99,13 @@ export function TransactionDialog({
 
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-foreground/80 font-display">
-                Note (Optional)
+                {t.dialogs.note} {t.dialogs.noteOptional}
               </label>
               <input
                 type="text"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                placeholder={isDeposit ? "Weekly savings..." : "Emergency car repair..."}
+                placeholder={t.dialogs.notePlaceholder}
                 className="w-full px-4 py-3 rounded-xl bg-background border-2 border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
               />
             </div>
@@ -116,7 +116,7 @@ export function TransactionDialog({
                 onClick={onClose}
                 className="flex-1 px-4 py-3 rounded-xl font-semibold text-foreground/70 hover:bg-muted transition-colors"
               >
-                Cancel
+                {t.goalDetails.cancel}
               </button>
               <button
                 type="submit"
@@ -131,7 +131,7 @@ export function TransactionDialog({
                   }
                 `}
               >
-                {isPending ? "Processing..." : isDeposit ? "Save Money" : "Withdraw"}
+                {isPending ? t.dialogs.processing : isDeposit ? t.dialogs.addFunds : t.dialogs.withdrawFunds}
               </button>
             </div>
           </form>
