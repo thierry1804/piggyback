@@ -1,14 +1,20 @@
 // Piggyback Service Worker - Offline Support
-const CACHE_NAME = 'piggyback-v1';
-const STATIC_CACHE = 'piggyback-static-v1';
+const CACHE_VERSION = 'v2';
+const CACHE_NAME = `piggyback-${CACHE_VERSION}`;
+const STATIC_CACHE = `piggyback-static-${CACHE_VERSION}`;
 
 // Resources to cache immediately on install
 const PRECACHE_RESOURCES = [
   '/',
   '/index.html',
   '/manifest.webmanifest',
-  '/favicon.ico'
+  '/favicon.ico',
+  '/icons/icon.svg',
+  '/og-image.svg'
 ];
+
+// File extensions that should always be cached
+const CACHEABLE_EXTENSIONS = ['.js', '.css', '.woff', '.woff2', '.png', '.jpg', '.jpeg', '.svg', '.ico'];
 
 // Install event - cache essential resources
 self.addEventListener('install', (event) => {
@@ -56,6 +62,15 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// Helper: Check if URL should be cached
+function shouldCache(url) {
+  const pathname = url.pathname;
+  // Always cache assets directory (Vite build output)
+  if (pathname.startsWith('/assets/')) return true;
+  // Cache files with known extensions
+  return CACHEABLE_EXTENSIONS.some(ext => pathname.endsWith(ext));
+}
+
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
   const { request } = event;
@@ -73,94 +88,127 @@ self.addEventListener('fetch', (event) => {
 
   // Skip external requests (fonts, analytics, etc.)
   if (url.origin !== self.location.origin) {
-    // For Google Fonts, try network first, then cache
+    // For Google Fonts, try cache first then network (for offline support)
     if (url.hostname.includes('fonts.googleapis.com') || 
         url.hostname.includes('fonts.gstatic.com')) {
       event.respondWith(
-        caches.open(CACHE_NAME)
-          .then((cache) => {
+        caches.match(request)
+          .then((cachedResponse) => {
+            if (cachedResponse) {
+              return cachedResponse;
+            }
             return fetch(request)
               .then((response) => {
                 if (response.ok) {
-                  cache.put(request, response.clone());
+                  const responseToCache = response.clone();
+                  caches.open(CACHE_NAME)
+                    .then((cache) => cache.put(request, responseToCache));
                 }
                 return response;
               })
               .catch(() => {
-                return cache.match(request);
+                // Return empty response for fonts (app will use fallback fonts)
+                return new Response('', { status: 200 });
               });
           })
       );
+      return;
     }
     return;
   }
 
-  // For navigation requests (HTML pages), use network-first strategy
+  // For navigation requests (HTML pages), use cache-first for offline, network-first when online
   if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request)
-        .then((response) => {
-          // Cache the response for offline use
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME)
-            .then((cache) => {
-              cache.put(request, responseToCache);
+      // Try cache first for instant loading
+      caches.match('/index.html')
+        .then((cachedResponse) => {
+          // Try to fetch latest version
+          const fetchPromise = fetch(request)
+            .then((response) => {
+              // Cache the response for offline use
+              const responseToCache = response.clone();
+              caches.open(CACHE_NAME)
+                .then((cache) => {
+                  cache.put(request, responseToCache);
+                  cache.put('/index.html', responseToCache.clone());
+                });
+              return response;
+            })
+            .catch(() => {
+              // Network failed, return cached version
+              console.log('[SW] Network failed, serving cached index.html');
+              return cachedResponse || caches.match('/index.html');
             });
-          return response;
+
+          // Return cached version immediately if available, otherwise wait for network
+          return cachedResponse || fetchPromise;
         })
-        .catch(() => {
-          // If network fails, try cache
-          return caches.match(request)
-            .then((cachedResponse) => {
-              if (cachedResponse) {
-                return cachedResponse;
+    );
+    return;
+  }
+
+  // For Vite assets (/assets/*), use cache-first (they have hashed names)
+  if (url.pathname.startsWith('/assets/')) {
+    event.respondWith(
+      caches.match(request)
+        .then((cachedResponse) => {
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+          // Not in cache, fetch and cache
+          return fetch(request)
+            .then((response) => {
+              if (response.ok) {
+                const responseToCache = response.clone();
+                caches.open(CACHE_NAME)
+                  .then((cache) => cache.put(request, responseToCache));
               }
-              // If no cache, return the offline page (index.html for SPA)
-              return caches.match('/index.html');
+              return response;
+            })
+            .catch((error) => {
+              console.error('[SW] Failed to fetch asset:', url.pathname, error);
+              throw error;
             });
         })
     );
     return;
   }
 
-  // For static assets (JS, CSS, images), use cache-first strategy
+  // For other static assets, use cache-first with background update
   event.respondWith(
     caches.match(request)
       .then((cachedResponse) => {
         if (cachedResponse) {
-          // Return cached version, but also update cache in background
-          event.waitUntil(
-            fetch(request)
-              .then((response) => {
-                if (response.ok) {
-                  caches.open(CACHE_NAME)
-                    .then((cache) => {
-                      cache.put(request, response);
-                    });
-                }
-              })
-              .catch(() => {
-                // Network failed, but we already have cached version
-              })
-          );
+          // Return cached version, but also update cache in background if online
+          if (navigator.onLine) {
+            event.waitUntil(
+              fetch(request)
+                .then((response) => {
+                  if (response.ok) {
+                    caches.open(CACHE_NAME)
+                      .then((cache) => cache.put(request, response));
+                  }
+                })
+                .catch(() => { /* Ignore network errors in background */ })
+            );
+          }
           return cachedResponse;
         }
 
         // Not in cache, fetch from network
         return fetch(request)
           .then((response) => {
-            // Cache the response for future use
-            if (response.ok) {
+            // Cache the response for future use if it's cacheable
+            if (response.ok && shouldCache(url)) {
               const responseToCache = response.clone();
               caches.open(CACHE_NAME)
-                .then((cache) => {
-                  cache.put(request, responseToCache);
-                });
+                .then((cache) => cache.put(request, responseToCache));
             }
             return response;
           })
           .catch((error) => {
-            console.error('[SW] Fetch failed:', error);
+            console.error('[SW] Fetch failed:', url.pathname, error);
             // Return a fallback for images if needed
             if (request.destination === 'image') {
               return new Response(
