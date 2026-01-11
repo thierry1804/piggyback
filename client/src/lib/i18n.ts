@@ -138,6 +138,16 @@ export const translations = {
       addFunds: "Add Funds",
       withdrawFunds: "Withdraw",
     },
+    // SEO Meta Tags
+    seo: {
+      title: "Piggyback - Free Savings App | Reach Your Financial Goals",
+      description: "Piggyback: the free app to save money and reach your savings goals. 100% private, no sign-up required. Track your savings easily.",
+      ogTitle: "Piggyback - Save and Reach Your Dreams",
+      ogDescription: "Free savings app. Create goals, track progress, achieve your dreams. 100% private, no account needed.",
+      twitterTitle: "Piggyback - Free Savings App",
+      twitterDescription: "Reach your savings goals easily. 100% free, 100% private. No sign-up required.",
+      keywords: "savings, save money, digital piggy bank, savings goal, savings tracker, budget management, free savings app, money tracker, financial goals",
+    },
     // Common
     common: {
       of: "of",
@@ -274,6 +284,16 @@ export const translations = {
       addFunds: "Ajouter des fonds",
       withdrawFunds: "Retirer",
     },
+    // SEO Meta Tags
+    seo: {
+      title: "Piggyback - Application Gratuite d'Épargne | Atteignez vos Objectifs Financiers",
+      description: "Piggyback: l'application gratuite pour économiser et atteindre vos objectifs d'épargne. 100% privée, sans inscription. Suivez vos économies facilement.",
+      ogTitle: "Piggyback - Économisez et Atteignez vos Rêves",
+      ogDescription: "Application gratuite d'épargne. Créez vos objectifs, suivez votre progression, réalisez vos projets. 100% privée, sans compte requis.",
+      twitterTitle: "Piggyback - Application d'Épargne Gratuite",
+      twitterDescription: "Atteignez vos objectifs d'épargne facilement. 100% gratuit, 100% privé. Sans inscription requise.",
+      keywords: "épargne, économiser, tirelire numérique, objectif épargne, suivi épargne, gestion budget, application gratuite épargne, objectifs financiers",
+    },
     // Common
     common: {
       of: "sur",
@@ -409,6 +429,16 @@ export const translations = {
       processing: "Manodina...",
       addFunds: "Ampio vola",
       withdrawFunds: "Makà vola",
+    },
+    // SEO Meta Tags
+    seo: {
+      title: "Piggyback - Fampiharana Fitehirizana Maimaim-poana | Tratraro ny Tanjonao Ara-bola",
+      description: "Piggyback: fampiharana maimaim-poana hitahiry vola sy hahatratra ny tanjonao amin'ny fitehirizana. 100% tsiambaratelo, tsy mila fisoratana anarana. Araho mora foana ny tahirinao.",
+      ogTitle: "Piggyback - Tehirizo ary Tratraro ny Nofinao",
+      ogDescription: "Fampiharana fitehirizana maimaim-poana. Mamorona tanjona, araho ny fandrosoana, tanteraho ny nofinao. 100% tsiambaratelo.",
+      twitterTitle: "Piggyback - Fampiharana Fitehirizana Maimaim-poana",
+      twitterDescription: "Tratraro ny tanjonao amin'ny fitehirizana mora foana. 100% maimaim-poana, 100% tsiambaratelo.",
+      keywords: "fitehirizana, mitahiry vola, vata fitehirizana, tanjona fitehirizana, fanaraha-maso tahiry, fitantanana vola, fampiharana maimaim-poana",
     },
     // Common
     common: {
