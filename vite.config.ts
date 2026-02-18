@@ -4,6 +4,8 @@ import path from "path";
 
 export default defineConfig({
   plugins: [react()],
+  // Charger .env depuis la racine du projet (où se trouve vite.config.ts), pas depuis client/
+  envDir: path.resolve(import.meta.dirname),
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "client", "src"),

@@ -27,12 +27,19 @@ export interface Settings {
   language: "en" | "fr" | "mg";
 }
 
+export interface SyncMetadata {
+  lastSyncAt: string | null; // ISO date
+  lastSyncLocalGoalsCount: number;
+  lastSyncCloudGoalsCount: number;
+}
+
 const STORAGE_KEYS = {
   GOALS: 'simple-piggy-goals',
   TRANSACTIONS: 'simple-piggy-transactions',
   SETTINGS: 'simple-piggy-settings',
   NEXT_GOAL_ID: 'simple-piggy-next-goal-id',
   NEXT_TRANSACTION_ID: 'simple-piggy-next-transaction-id',
+  SYNC_METADATA: 'simple-piggy-sync-metadata',
 } as const;
 
 // Service de stockage localStorage
@@ -161,6 +168,66 @@ class LocalStorageService {
 
   setSettings(settings: Settings): void {
     localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
+  }
+
+  getSyncMetadata(): SyncMetadata {
+    const data = localStorage.getItem(STORAGE_KEYS.SYNC_METADATA);
+    if (!data) {
+      return {
+        lastSyncAt: null,
+        lastSyncLocalGoalsCount: 0,
+        lastSyncCloudGoalsCount: 0,
+      };
+    }
+    try {
+      const parsed = JSON.parse(data) as Partial<SyncMetadata>;
+      return {
+        lastSyncAt: parsed.lastSyncAt ?? null,
+        lastSyncLocalGoalsCount: parsed.lastSyncLocalGoalsCount ?? 0,
+        lastSyncCloudGoalsCount: parsed.lastSyncCloudGoalsCount ?? 0,
+      };
+    } catch {
+      return {
+        lastSyncAt: null,
+        lastSyncLocalGoalsCount: 0,
+        lastSyncCloudGoalsCount: 0,
+      };
+    }
+  }
+
+  setSyncMetadata(meta: Partial<SyncMetadata>): void {
+    const current = this.getSyncMetadata();
+    const next: SyncMetadata = {
+      lastSyncAt: meta.lastSyncAt ?? current.lastSyncAt,
+      lastSyncLocalGoalsCount: meta.lastSyncLocalGoalsCount ?? current.lastSyncLocalGoalsCount,
+      lastSyncCloudGoalsCount: meta.lastSyncCloudGoalsCount ?? current.lastSyncCloudGoalsCount,
+    };
+    localStorage.setItem(STORAGE_KEYS.SYNC_METADATA, JSON.stringify(next));
+  }
+
+  /** Empreinte locale pour la décision de sync : count + latestCreatedAt. */
+  getLocalSyncFingerprint(): { goalsCount: number; latestCreatedAt: string | undefined } {
+    const goals = this.getGoals();
+    const goalsCount = goals.length;
+    const latestCreatedAt =
+      goals.length > 0
+        ? goals.reduce((max, g) => (g.createdAt > max ? g.createdAt : max), goals[0].createdAt)
+        : undefined;
+    return { goalsCount, latestCreatedAt };
+  }
+
+  /** Remplace tous les goals (ex. après sync depuis Supabase). Met à jour NEXT_GOAL_ID. */
+  setGoals(goals: Goal[]): void {
+    localStorage.setItem(STORAGE_KEYS.GOALS, JSON.stringify(goals));
+    const maxId = goals.length > 0 ? Math.max(...goals.map((g) => g.id), 0) : 0;
+    this.setNextGoalId(maxId + 1);
+  }
+
+  /** Remplace toutes les transactions (ex. après sync depuis Supabase). Met à jour NEXT_TRANSACTION_ID. */
+  setTransactions(transactions: Transaction[]): void {
+    localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(transactions));
+    const maxId = transactions.length > 0 ? Math.max(...transactions.map((t) => t.id), 0) : 0;
+    this.setNextTransactionId(maxId + 1);
   }
 
   // Helpers pour les IDs

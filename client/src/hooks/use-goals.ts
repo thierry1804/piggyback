@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { localStorageService, type Goal } from "@/lib/localStorage";
+import { syncLocalToSupabaseIfConnected } from "@/lib/supabase";
 import { insertGoalSchema } from "@shared/schema";
 import type { z } from "zod";
 
@@ -98,8 +99,8 @@ export function useCreateGoal() {
       }
     },
     onSuccess: () => {
-      // Rafraîchir directement depuis localStorage (fonctionne hors-ligne)
       refreshQueriesFromLocalStorage(queryClient);
+      syncLocalToSupabaseIfConnected();
     },
     retry: false,
   });
@@ -122,10 +123,9 @@ export function useDeleteGoal() {
       }
     },
     onSuccess: (deletedId) => {
-      // Rafraîchir directement depuis localStorage (fonctionne hors-ligne)
       refreshQueriesFromLocalStorage(queryClient);
-      // Supprimer aussi le cache du goal spécifique
       queryClient.removeQueries({ queryKey: ['goal', deletedId] });
+      syncLocalToSupabaseIfConnected();
     },
     retry: false,
   });

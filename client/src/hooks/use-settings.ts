@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { localStorageService, type Settings } from "@/lib/localStorage";
+import { syncLocalToSupabaseIfConnected } from "@/lib/supabase";
 
 const defaultSettings: Settings = {
   currencyCode: 'MGA',
@@ -45,8 +46,8 @@ export function useUpdateSettings() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings'] });
-      // Invalider aussi les goals pour qu'ils se mettent à jour avec la nouvelle monnaie
       queryClient.invalidateQueries({ queryKey: ['goals'] });
+      syncLocalToSupabaseIfConnected();
     },
   });
 }

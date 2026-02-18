@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { useSEO } from "@/hooks/use-seo";
+import { useAutoSync } from "@/hooks/use-auto-sync";
 import Landing from "@/pages/Landing";
 import Dashboard from "@/pages/Dashboard";
 import GoalDetails from "@/pages/GoalDetails";
@@ -30,10 +31,19 @@ function SEOManager() {
   return null;
 }
 
+/**
+ * Lance une smart sync une fois par session quand l'utilisateur est dans /app.
+ */
+function AppAutoSync() {
+  useAutoSync();
+  return null;
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <SEOManager />
+      <AppAutoSync />
       <OfflineBanner />
       <Toaster />
       <Router />

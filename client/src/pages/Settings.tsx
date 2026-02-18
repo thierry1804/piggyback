@@ -1,10 +1,14 @@
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
-import { ArrowLeft, Save, Globe } from "lucide-react";
+import { ArrowLeft, Save, Globe, Cloud, CloudDownload, Loader2, LogOut } from "lucide-react";
 import { useSettings, useUpdateSettings } from "@/hooks/use-settings";
 import { useLanguage } from "@/hooks/use-language";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { useSession, useSignOut } from "@/hooks/use-auth";
+import { AuthDialog } from "@/components/AuthDialog";
+import { syncLocalToSupabase, syncSupabaseToLocal, updateSyncMetadataAfterSuccess, runSmartSync } from "@/lib/supabase";
+import { localStorageService } from "@/lib/localStorage";
+import { useQueryClient } from "@tanstack/react-query";
 import { languages, type Language } from "@/lib/i18n";
 
 export default function Settings() {
@@ -12,10 +16,58 @@ export default function Settings() {
   const { mutate: updateSettings, isPending } = useUpdateSettings();
   const { t } = useLanguage();
   const { toast } = useToast();
-  
+  const { user, isSignedIn, isLoading: authLoading } = useSession();
+  const { signOut } = useSignOut();
+  const queryClient = useQueryClient();
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
+  const [syncPending, setSyncPending] = useState(false);
+  const [downloadPending, setDownloadPending] = useState(false);
+
   const [currencyCode, setCurrencyCode] = useState(settings?.currencyCode || "MGA");
   const [currencySymbol, setCurrencySymbol] = useState(settings?.currencySymbol || "Ar");
   const [language, setLanguage] = useState<Language>(settings?.language || "en");
+
+  const handleSync = async () => {
+    setSyncPending(true);
+    try {
+      await syncLocalToSupabase();
+      const count = localStorageService.getGoals().length;
+      updateSyncMetadataAfterSuccess(count, count);
+      toast({
+        title: t.settings.syncSuccess,
+      });
+    } catch (err) {
+      toast({
+        title: t.settings.syncError,
+        description: err instanceof Error ? err.message : String(err),
+        variant: "destructive",
+      });
+    } finally {
+      setSyncPending(false);
+    }
+  };
+
+  const handleDownload = async () => {
+    setDownloadPending(true);
+    try {
+      await syncSupabaseToLocal();
+      const count = localStorageService.getGoals().length;
+      updateSyncMetadataAfterSuccess(count, count);
+      queryClient.invalidateQueries({ queryKey: ["goals"] });
+      queryClient.invalidateQueries({ queryKey: ["settings"] });
+      toast({
+        title: t.settings.syncDownloadSuccess,
+      });
+    } catch (err) {
+      toast({
+        title: t.settings.syncError,
+        description: err instanceof Error ? err.message : String(err),
+        variant: "destructive",
+      });
+    } finally {
+      setDownloadPending(false);
+    }
+  };
 
   // Mettre à jour les états quand les settings changent
   useEffect(() => {
@@ -143,6 +195,85 @@ export default function Settings() {
             </div>
           </div>
 
+          {/* Synchronisation */}
+          <div className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-xl shadow-black/5 border border-border/50">
+            <div className="flex items-center gap-3 mb-2">
+              <Cloud className="w-6 h-6 text-primary" />
+              <h2 className="text-2xl font-bold text-foreground font-display">{t.settings.syncTitle}</h2>
+            </div>
+            <p className="text-muted-foreground mb-6">
+              {t.settings.syncDescription}
+            </p>
+            {!authLoading && (
+              <>
+                {!isSignedIn ? (
+                  <div className="space-y-4">
+                    <p className="text-foreground/90">{t.settings.syncInvite}</p>
+                    <button
+                      type="button"
+                      onClick={() => setAuthDialogOpen(true)}
+                      className="px-6 py-3 rounded-xl font-semibold text-white bg-primary hover:bg-primary/90 shadow-lg shadow-primary/25 transition-all"
+                    >
+                      {t.auth.signIn} / {t.auth.signUp}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      {t.settings.connectedAs} <span className="font-medium text-foreground">{user?.email ?? ""}</span>
+                    </p>
+                    <div className="flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        onClick={handleSync}
+                        disabled={syncPending || downloadPending}
+                        className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white bg-primary hover:bg-primary/90 disabled:opacity-50 transition-all"
+                      >
+                        {syncPending ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            {t.settings.syncing}
+                          </>
+                        ) : (
+                          <>
+                            <Cloud className="w-4 h-4" />
+                            {t.settings.syncButton}
+                          </>
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleDownload}
+                        disabled={syncPending || downloadPending}
+                        className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-primary border-2 border-primary bg-primary/5 hover:bg-primary/10 disabled:opacity-50 transition-all"
+                      >
+                        {downloadPending ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            {t.settings.syncDownloading}
+                          </>
+                        ) : (
+                          <>
+                            <CloudDownload className="w-4 h-4" />
+                            {t.settings.syncDownload}
+                          </>
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => signOut()}
+                        className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-foreground/70 hover:bg-muted transition-colors"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        {t.settings.signOut}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+
           {/* Submit Button */}
           <div className="flex justify-end gap-3">
             <Link
@@ -170,6 +301,20 @@ export default function Settings() {
             </button>
           </div>
         </form>
+
+        <AuthDialog
+          open={authDialogOpen}
+          onOpenChange={setAuthDialogOpen}
+          onSuccess={async () => {
+            try {
+              await runSmartSync();
+              queryClient.invalidateQueries({ queryKey: ["goals"] });
+              queryClient.invalidateQueries({ queryKey: ["settings"] });
+            } catch {
+              // silent; useAutoSync may retry
+            }
+          }}
+        />
       </main>
     </div>
   );
