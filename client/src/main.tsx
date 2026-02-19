@@ -2,6 +2,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
 import { localStorageService } from "./lib/localStorage";
+import { getBasePathPrefix } from "./lib/basePath";
 
 // Vérifier que localStorage est disponible
 function isLocalStorageAvailable(): boolean {
@@ -51,7 +52,7 @@ function registerServiceWorker(): void {
   // Attendre que la page soit complètement chargée
   window.addEventListener('load', async () => {
     try {
-      const registration = await navigator.serviceWorker.register('/sw.js');
+      const registration = await navigator.serviceWorker.register(getBasePathPrefix() + "sw.js");
       console.log('[App] Service Worker registered:', registration.scope);
       
       // Vérifier les mises à jour périodiquement

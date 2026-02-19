@@ -4,6 +4,8 @@ import path from "path";
 
 export default defineConfig({
   plugins: [react()],
+  /** Base relative : même build déployable à la racine (/) ou dans un sous-dossier (/piggyback/) */
+  base: "./",
   // Charger .env depuis la racine du projet (où se trouve vite.config.ts), pas depuis client/
   envDir: path.resolve(import.meta.dirname),
   resolve: {
