@@ -3,22 +3,32 @@ const CACHE_VERSION = 'v2';
 const CACHE_NAME = `piggyback-${CACHE_VERSION}`;
 const STATIC_CACHE = `piggyback-static-${CACHE_VERSION}`;
 
-// Resources to cache immediately on install
-const PRECACHE_RESOURCES = [
-  '/',
-  '/index.html',
-  '/manifest.webmanifest',
-  '/favicon.ico',
-  '/icons/icon.svg',
-  '/og-image.svg'
-];
+// Base path from SW scope (e.g. "/piggyback/" or "/") so PWA and precache stay under the app
+function getBase() {
+  try {
+    const scope = self.registration && self.registration.scope ? self.registration.scope : self.location.pathname.replace(/\/sw\.js.*$/, '/');
+    const path = new URL(scope).pathname;
+    return path.endsWith('/') ? path : path + '/';
+  } catch {
+    return '/';
+  }
+}
 
 // File extensions that should always be cached
 const CACHEABLE_EXTENSIONS = ['.js', '.css', '.woff', '.woff2', '.png', '.jpg', '.jpeg', '.svg', '.ico'];
 
-// Install event - cache essential resources
+// Install event - cache essential resources under the app base path
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing service worker...');
+  const base = getBase();
+  const PRECACHE_RESOURCES = [
+    base,
+    base + 'index.html',
+    base + 'manifest.webmanifest',
+    base + 'favicon.ico',
+    base + 'icons/icon.svg',
+    base + 'og-image.svg'
+  ];
+  console.log('[SW] Installing service worker...', base);
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then((cache) => {
@@ -65,8 +75,8 @@ self.addEventListener('activate', (event) => {
 // Helper: Check if URL should be cached
 function shouldCache(url) {
   const pathname = url.pathname;
-  // Always cache assets directory (Vite build output)
-  if (pathname.startsWith('/assets/')) return true;
+  // Always cache assets directory (Vite build output), e.g. /assets/ or /piggyback/assets/
+  if (pathname.includes('/assets/')) return true;
   // Cache files with known extensions
   return CACHEABLE_EXTENSIONS.some(ext => pathname.endsWith(ext));
 }
@@ -119,37 +129,33 @@ self.addEventListener('fetch', (event) => {
 
   // For navigation requests (HTML pages), use cache-first for offline, network-first when online
   if (request.mode === 'navigate') {
+    const base = getBase();
+    const indexUrl = base + 'index.html';
     event.respondWith(
-      // Try cache first for instant loading
-      caches.match('/index.html')
+      caches.match(indexUrl)
         .then((cachedResponse) => {
-          // Try to fetch latest version
           const fetchPromise = fetch(request)
             .then((response) => {
-              // Cache the response for offline use
               const responseToCache = response.clone();
               caches.open(CACHE_NAME)
                 .then((cache) => {
                   cache.put(request, responseToCache);
-                  cache.put('/index.html', responseToCache.clone());
+                  cache.put(indexUrl, responseToCache.clone());
                 });
               return response;
             })
             .catch(() => {
-              // Network failed, return cached version
               console.log('[SW] Network failed, serving cached index.html');
-              return cachedResponse || caches.match('/index.html');
+              return cachedResponse || caches.match(indexUrl);
             });
-
-          // Return cached version immediately if available, otherwise wait for network
           return cachedResponse || fetchPromise;
         })
     );
     return;
   }
 
-  // For Vite assets (/assets/*), use cache-first (they have hashed names)
-  if (url.pathname.startsWith('/assets/')) {
+  // For Vite assets (e.g. /assets/* or /piggyback/assets/*), use cache-first
+  if (url.pathname.includes('/assets/')) {
     event.respondWith(
       caches.match(request)
         .then((cachedResponse) => {

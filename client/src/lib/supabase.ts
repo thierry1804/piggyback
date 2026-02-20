@@ -107,8 +107,10 @@ export async function getSyncDirection(
   const localChanged = local.goalsCount !== lastSyncLocalGoalsCount;
   const cloudChanged = cloud.goalsCount !== lastSyncCloudGoalsCount;
 
+  // Compte nouveau ou cloud vide : si le local a des goals, on envoie vers le cloud (ex. création de compte avec données locales)
+  if (cloud.goalsCount === 0 && local.goalsCount > 0) return "upload";
+
   if (!lastSyncAt) {
-    if (cloud.goalsCount === 0 && local.goalsCount > 0) return "upload";
     if (cloud.goalsCount > 0 && local.goalsCount === 0) return "download";
     if (local.goalsCount === 0 && cloud.goalsCount === 0) return "skip";
     // Les deux non vides (ex. 2e navigateur avec démo) : privilégier le download
