@@ -1,6 +1,5 @@
-import { Link, useRoute } from "wouter";
+import { Link, useRoute, useLocation } from "wouter";
 import { useGoal, useDeleteGoal } from "@/hooks/use-goals";
-import { getBasePathPrefix } from "@/lib/basePath";
 import { TransactionDialog } from "@/components/TransactionDialog";
 import { ProgressBar } from "@/components/ProgressBar";
 import { 
@@ -31,13 +30,16 @@ import {
 import { cn } from "@/lib/utils";
 import { useSettings } from "@/hooks/use-settings";
 import { useLanguage } from "@/hooks/use-language";
+import { useSyncFromCloud } from "@/contexts/SyncContext";
 
 export default function GoalDetails() {
   const [, params] = useRoute("/app/goal/:id");
   const id = parseInt(params?.id || "0");
+  const [, setLocation] = useLocation();
   const { data: goal, isLoading, isError } = useGoal(id);
   const { mutate: deleteGoal } = useDeleteGoal();
   const { data: settings } = useSettings();
+  const { isSyncingFromCloud } = useSyncFromCloud();
   const { t } = useLanguage();
   const currencySymbol = settings?.currencySymbol || "Ar";
   
@@ -67,8 +69,8 @@ export default function GoalDetails() {
   const handleDelete = () => {
     deleteGoal(id, {
       onSuccess: () => {
-        // useDeleteGoal handles cache invalidation ; redirection avec base path (ex. /piggyback/app)
-        window.location.href = (getBasePathPrefix() || "/") + "app";
+        // Navigation côté client pour ne pas interrompre la sync cloud (window.location aurait rechargé la page)
+        setLocation("/app");
       }
     });
   };
@@ -92,6 +94,12 @@ export default function GoalDetails() {
   return (
     <div className="min-h-screen bg-background pb-20">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+        {isSyncingFromCloud && (
+          <div className="mb-6 flex items-center gap-3 px-4 py-3 rounded-xl bg-primary/10 border border-primary/20 text-primary">
+            <Loader2 className="w-5 h-5 animate-spin shrink-0" />
+            <p className="text-sm font-medium">{t.settings.loadingFromCloud}</p>
+          </div>
+        )}
         {/* Nav */}
         <div className="flex items-center justify-between mb-8">
           <Link href="/app" className="

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { localStorageService, type Goal } from "@/lib/localStorage";
 import { syncLocalToSupabaseIfConnected } from "@/lib/supabase";
+import { useSyncFromCloud } from "@/contexts/SyncContext";
 import { insertGoalSchema } from "@shared/schema";
 import type { z } from "zod";
 
@@ -77,6 +78,7 @@ function refreshQueriesFromLocalStorage(queryClient: ReturnType<typeof useQueryC
 
 export function useCreateGoal() {
   const queryClient = useQueryClient();
+  const { setSyncingToCloud } = useSyncFromCloud();
   return useMutation({
     mutationFn: async (data: InsertGoal) => {
       try {
@@ -100,7 +102,8 @@ export function useCreateGoal() {
     },
     onSuccess: () => {
       refreshQueriesFromLocalStorage(queryClient);
-      syncLocalToSupabaseIfConnected();
+      setSyncingToCloud(true);
+      syncLocalToSupabaseIfConnected().finally(() => setSyncingToCloud(false));
     },
     retry: false,
   });
@@ -108,6 +111,7 @@ export function useCreateGoal() {
 
 export function useDeleteGoal() {
   const queryClient = useQueryClient();
+  const { setSyncingToCloud } = useSyncFromCloud();
   return useMutation({
     mutationFn: async (id: number) => {
       try {
@@ -125,7 +129,8 @@ export function useDeleteGoal() {
     onSuccess: (deletedId) => {
       refreshQueriesFromLocalStorage(queryClient);
       queryClient.removeQueries({ queryKey: ['goal', deletedId] });
-      syncLocalToSupabaseIfConnected();
+      setSyncingToCloud(true);
+      syncLocalToSupabaseIfConnected().finally(() => setSyncingToCloud(false));
     },
     retry: false,
   });

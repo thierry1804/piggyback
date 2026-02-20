@@ -6,7 +6,8 @@ import { useLanguage } from "@/hooks/use-language";
 import { useToast } from "@/hooks/use-toast";
 import { useSession, useSignOut } from "@/hooks/use-auth";
 import { AuthDialog } from "@/components/AuthDialog";
-import { syncLocalToSupabase, syncSupabaseToLocal, updateSyncMetadataAfterSuccess, runSmartSync } from "@/lib/supabase";
+import { syncLocalToSupabase, syncSupabaseToLocal, updateSyncMetadataAfterSuccess, runSmartSync, resetSyncMetadataAfterLogin } from "@/lib/supabase";
+import { useSyncFromCloud } from "@/contexts/SyncContext";
 import { localStorageService } from "@/lib/localStorage";
 import { useQueryClient } from "@tanstack/react-query";
 import { languages, type Language } from "@/lib/i18n";
@@ -18,6 +19,7 @@ export default function Settings() {
   const { toast } = useToast();
   const { user, isSignedIn, isLoading: authLoading } = useSession();
   const { signOut } = useSignOut();
+  const { isSyncingFromCloud, setSyncingFromCloud } = useSyncFromCloud();
   const queryClient = useQueryClient();
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [syncPending, setSyncPending] = useState(false);
@@ -49,6 +51,7 @@ export default function Settings() {
 
   const handleDownload = async () => {
     setDownloadPending(true);
+    setSyncingFromCloud(true);
     try {
       await syncSupabaseToLocal();
       const count = localStorageService.getGoals().length;
@@ -66,6 +69,7 @@ export default function Settings() {
       });
     } finally {
       setDownloadPending(false);
+      setSyncingFromCloud(false);
     }
   };
 
@@ -123,6 +127,12 @@ export default function Settings() {
       </header>
 
       <main className="px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
+        {isSyncingFromCloud && (
+          <div className="mb-6 flex items-center gap-3 px-4 py-3 rounded-xl bg-primary/10 border border-primary/20 text-primary">
+            <Loader2 className="w-5 h-5 animate-spin shrink-0" />
+            <p className="text-sm font-medium">{t.settings.loadingFromCloud}</p>
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Language Settings */}
           <div className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-xl shadow-black/5 border border-border/50">
@@ -261,7 +271,10 @@ export default function Settings() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => signOut()}
+                        onClick={async () => {
+                          await signOut();
+                          resetSyncMetadataAfterLogin();
+                        }}
                         className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-foreground/70 hover:bg-muted transition-colors"
                       >
                         <LogOut className="w-4 h-4" />
@@ -307,11 +320,15 @@ export default function Settings() {
           onOpenChange={setAuthDialogOpen}
           onSuccess={async () => {
             try {
+              resetSyncMetadataAfterLogin();
+              setSyncingFromCloud(true);
               await runSmartSync();
               queryClient.invalidateQueries({ queryKey: ["goals"] });
               queryClient.invalidateQueries({ queryKey: ["settings"] });
             } catch {
               // silent; useAutoSync may retry
+            } finally {
+              setSyncingFromCloud(false);
             }
           }}
         />

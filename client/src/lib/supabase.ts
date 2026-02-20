@@ -126,6 +126,18 @@ export async function getSyncDirection(
 }
 
 /**
+ * Réinitialise les métadonnées de sync (état « jamais synchronisé »).
+ * À appeler à la connexion (avant runSmartSync) et à la déconnexion pour que le cloud soit la source de vérité au prochain login.
+ */
+export function resetSyncMetadataAfterLogin(): void {
+  localStorageService.setSyncMetadata({
+    lastSyncAt: null,
+    lastSyncLocalGoalsCount: 0,
+    lastSyncCloudGoalsCount: 0,
+  });
+}
+
+/**
  * Met à jour les métadonnées de sync après une sync réussie (utilisable après sync manuelle ou après mutation).
  */
 export function updateSyncMetadataAfterSuccess(
@@ -167,13 +179,14 @@ export async function runSmartSync(
 }
 
 /**
- * Si l'utilisateur est connecté, lance un upload en arrière-plan et met à jour les métadonnées après succès.
+ * Si l'utilisateur est connecté, lance un upload et met à jour les métadonnées après succès.
  * À appeler après une mutation locale (création/suppression goal, création transaction, update settings).
+ * Retourne une Promise pour permettre d'afficher un loading pendant la sync.
  */
-export function syncLocalToSupabaseIfConnected(): void {
+export function syncLocalToSupabaseIfConnected(): Promise<void> {
   const c = getSupabase();
-  if (!c) return;
-  (async () => {
+  if (!c) return Promise.resolve();
+  return (async () => {
     try {
       const {
         data: { user },
@@ -183,7 +196,7 @@ export function syncLocalToSupabaseIfConnected(): void {
       const count = localStorageService.getGoals().length;
       updateSyncMetadataAfterSuccess(count, count);
     } catch {
-      // silent: fire-and-forget
+      // silent
     }
   })();
 }

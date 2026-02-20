@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { localStorageService, type Settings } from "@/lib/localStorage";
 import { syncLocalToSupabaseIfConnected } from "@/lib/supabase";
+import { useSyncFromCloud } from "@/contexts/SyncContext";
 
 const defaultSettings: Settings = {
   currencyCode: 'MGA',
@@ -39,6 +40,7 @@ export function useSettings() {
 
 export function useUpdateSettings() {
   const queryClient = useQueryClient();
+  const { setSyncingToCloud } = useSyncFromCloud();
   return useMutation({
     mutationFn: async (settings: Settings) => {
       localStorageService.setSettings(settings);
@@ -47,7 +49,8 @@ export function useUpdateSettings() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings'] });
       queryClient.invalidateQueries({ queryKey: ['goals'] });
-      syncLocalToSupabaseIfConnected();
+      setSyncingToCloud(true);
+      syncLocalToSupabaseIfConnected().finally(() => setSyncingToCloud(false));
     },
   });
 }

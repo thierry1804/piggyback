@@ -4,15 +4,18 @@ import { useGoals } from "@/hooks/use-goals";
 import { GoalCard } from "@/components/GoalCard";
 import { CreateGoalDialog } from "@/components/CreateGoalDialog";
 import { TransactionDialog } from "@/components/TransactionDialog";
-import { Loader2, TrendingUp, PiggyBank, Settings as SettingsIcon } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Loader2, TrendingUp, PiggyBank, Settings as SettingsIcon, Cloud } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Goal } from "@/lib/localStorage";
 import { useSettings } from "@/hooks/use-settings";
 import { useLanguage } from "@/hooks/use-language";
+import { useSyncFromCloud } from "@/contexts/SyncContext";
 
 export default function Dashboard() {
   const { data: goals, isLoading, isError } = useGoals();
   const { data: settings } = useSettings();
+  const { isSyncingFromCloud, isSyncingToCloud } = useSyncFromCloud();
   const { t } = useLanguage();
   const [quickAddGoal, setQuickAddGoal] = useState<Goal | null>(null);
 
@@ -20,6 +23,44 @@ export default function Dashboard() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (isSyncingFromCloud) {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <header className="pt-12 pb-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div>
+              <Skeleton className="h-10 w-48 mb-2" />
+              <Skeleton className="h-5 w-64" />
+            </div>
+            <div className="flex gap-3">
+              <Skeleton className="h-10 w-24" />
+              <Skeleton className="h-10 w-32" />
+            </div>
+          </div>
+        </header>
+        <main className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-8 sm:space-y-12">
+          <Skeleton className="h-40 w-full rounded-2xl" />
+          <section>
+            <div className="flex items-center gap-2 mb-6">
+              <TrendingUp className="w-5 h-5 text-muted-foreground" />
+              <Skeleton className="h-6 w-40" />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-44 rounded-2xl" />
+              ))}
+            </div>
+          </section>
+          <div className="flex flex-col items-center justify-center gap-3 py-8 text-muted-foreground">
+            <Cloud className="w-8 h-8 animate-pulse" />
+            <p className="text-sm font-medium">{t.settings.loadingFromCloud}</p>
+            <Loader2 className="w-5 h-5 animate-spin" />
+          </div>
+        </main>
       </div>
     );
   }
@@ -107,7 +148,19 @@ export default function Dashboard() {
             <h2 className="text-xl font-bold text-foreground">{t.dashboard.yourGoals}</h2>
           </div>
 
-          {goals?.length === 0 ? (
+          {isSyncingToCloud ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3].map((i) => (
+                  <Skeleton key={i} className="h-44 rounded-2xl" />
+                ))}
+              </div>
+              <div className="flex items-center justify-center gap-2 py-4 text-muted-foreground">
+                <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+                <p className="text-sm font-medium">{t.settings.syncing}</p>
+              </div>
+            </div>
+          ) : goals?.length === 0 ? (
             <div className="text-center py-20 bg-card border border-border/50 rounded-3xl border-dashed">
               <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
                 🌱

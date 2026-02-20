@@ -1,17 +1,18 @@
 import { useRef, useEffect } from "react";
-import { useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import { getSupabase, runSmartSync } from "@/lib/supabase";
 import { useSession } from "@/hooks/use-auth";
+import { useSyncFromCloud } from "@/contexts/SyncContext";
 
 /**
- * Lance une smart sync une seule fois par session connectée lorsqu'on est dans /app.
+ * Lance une smart sync une seule fois par session connectée, au chargement (ou rechargement) de la page.
+ * Si l'utilisateur est connecté, la sync s'exécute dès que l'auth est prête, quelle que soit la route.
  * Réinitialise le flag quand l'utilisateur se déconnecte.
  */
 export function useAutoSync(): void {
-  const location = useLocation();
   const { isSignedIn, isLoading: authLoading } = useSession();
   const queryClient = useQueryClient();
+  const { setSyncingFromCloud } = useSyncFromCloud();
   const hasAutoSyncedThisSession = useRef(false);
 
   useEffect(() => {
@@ -22,15 +23,15 @@ export function useAutoSync(): void {
   }, [isSignedIn]);
 
   useEffect(() => {
-    const isInApp = location[0].startsWith("/app");
     const authReady = !authLoading && isSignedIn;
-    if (!isInApp || !authReady || hasAutoSyncedThisSession.current) return;
+    if (!authReady || hasAutoSyncedThisSession.current) return;
     const client = getSupabase();
     if (!client) return;
 
     let cancelled = false;
     (async () => {
       try {
+        setSyncingFromCloud(true);
         await runSmartSync(client);
         if (cancelled) return;
         hasAutoSyncedThisSession.current = true;
@@ -38,10 +39,13 @@ export function useAutoSync(): void {
         queryClient.invalidateQueries({ queryKey: ["settings"] });
       } catch {
         // silent: do not update ref so next entry can retry
+      } finally {
+        if (!cancelled) setSyncingFromCloud(false);
       }
     })();
     return () => {
       cancelled = true;
+      setSyncingFromCloud(false);
     };
-  }, [location, isSignedIn, authLoading, queryClient]);
+  }, [isSignedIn, authLoading, queryClient, setSyncingFromCloud]);
 }

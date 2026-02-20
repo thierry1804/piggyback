@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { localStorageService } from "@/lib/localStorage";
 import { syncLocalToSupabaseIfConnected } from "@/lib/supabase";
+import { useSyncFromCloud } from "@/contexts/SyncContext";
 import { insertTransactionSchema } from "@shared/schema";
 import type { z } from "zod";
 
@@ -8,6 +9,7 @@ type InsertTransaction = z.infer<typeof insertTransactionSchema>;
 
 export function useCreateTransaction() {
   const queryClient = useQueryClient();
+  const { setSyncingToCloud } = useSyncFromCloud();
   return useMutation({
     mutationFn: async (data: InsertTransaction) => {
       try {
@@ -41,7 +43,8 @@ export function useCreateTransaction() {
       } catch (error) {
         console.error('[useCreateTransaction] Failed to refresh cache:', error);
       }
-      syncLocalToSupabaseIfConnected();
+      setSyncingToCloud(true);
+      syncLocalToSupabaseIfConnected().finally(() => setSyncingToCloud(false));
     },
     onError: (error) => {
       console.error('[useCreateTransaction] Mutation error:', error);
