@@ -1,5 +1,6 @@
 import { Link, useRoute } from "wouter";
 import { useGoal, useDeleteGoal } from "@/hooks/use-goals";
+import { getBasePathPrefix } from "@/lib/basePath";
 import { TransactionDialog } from "@/components/TransactionDialog";
 import { ProgressBar } from "@/components/ProgressBar";
 import { 
@@ -66,8 +67,8 @@ export default function GoalDetails() {
   const handleDelete = () => {
     deleteGoal(id, {
       onSuccess: () => {
-        // useDeleteGoal handles cache invalidation
-        window.location.href = "/app";
+        // useDeleteGoal handles cache invalidation ; redirection avec base path (ex. /piggyback/app)
+        window.location.href = (getBasePathPrefix() || "/") + "app";
       }
     });
   };
