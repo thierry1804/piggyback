@@ -1,101 +1,101 @@
 # Piggyback
 
-Application web gratuite pour suivre vos objectifs d’épargne. Créez des objectifs, déposez ou retirez des fonds, visualisez votre progression. 100 % privée : les données restent sur votre appareil (synchronisation cloud optionnelle).
+Free web app to track your savings goals. Create goals, add or withdraw funds, and visualize your progress. 100% private: data stays on your device (optional cloud sync).
 
-## Fonctionnalités
+## Features
 
-- **Objectifs d’épargne** : nom, montant cible, icône, couleur, devise, échéance optionnelle
-- **Dépôts et retraits** : ajout rapide depuis une carte ou depuis le détail d’un objectif
-- **Tableau de bord** : total épargné, progression globale, liste des objectifs
-- **Détail par objectif** : graphique d’évolution, historique des transactions, conseils d’épargne
-- **Paramètres** : devise (code + symbole), langue (Français, English, Malagasy)
-- **Tutoriel** : page guide avec maquettes interactives et navigation par étapes
-- **Synchronisation cloud** (optionnelle) : connexion Supabase pour retrouver vos données sur plusieurs appareils
-- **Mode hors ligne** : Service Worker, données en localStorage
-- **Multilingue** : français, anglais, malgache
+- **Savings goals**: name, target amount, icon, color, currency, optional deadline
+- **Deposits and withdrawals**: quick add from a card or from a goal’s detail page
+- **Dashboard**: total saved, overall progress, list of goals
+- **Goal detail**: evolution chart, transaction history, savings tips
+- **Settings**: currency (code + symbol), language (French, English, Malagasy)
+- **Tutorial**: guided page with interactive mockups and step-by-step navigation
+- **Cloud sync** (optional): Supabase connection to access your data across devices
+- **Offline mode**: Service Worker, data in localStorage
+- **Multilingual**: French, English, Malagasy
 
-## Prérequis
+## Prerequisites
 
-- **Node.js** 18+ et npm
+- **Node.js** 18+ and npm
 
-## Installation et lancement
+## Installation and run
 
 ```bash
-# Cloner le dépôt (ou ouvrir le projet)
+# Clone the repo (or open the project)
 cd piggyback
 
-# Installer les dépendances
+# Install dependencies
 npm install
 
-# Lancer le serveur de développement
+# Start the dev server
 npm run dev
 ```
 
-L’application est disponible sur **http://localhost:5173/** (ou un autre port si 5173 est occupé).
+The app is available at **http://localhost:5173/** (or another port if 5173 is in use).
 
 ## Scripts
 
-| Commande        | Description                    |
-|----------------|--------------------------------|
-| `npm run dev`  | Serveur de développement Vite |
-| `npm run build`| Build de production            |
-| `npm run preview` | Prévisualiser le build      |
-| `npm run check`| Vérification TypeScript        |
+| Command           | Description              |
+|-------------------|--------------------------|
+| `npm run dev`     | Vite dev server          |
+| `npm run build`   | Production build         |
+| `npm run preview` | Preview the build        |
+| `npm run check`   | TypeScript check         |
 
-## Structure du projet
+## Project structure
 
 ```
 piggyback/
-├── client/                 # Frontend React (racine Vite)
-│   ├── public/             # Fichiers statiques (SW, manifest, icônes)
+├── client/                 # React frontend (Vite root)
+│   ├── public/             # Static assets (SW, manifest, icons)
 │   └── src/
-│       ├── components/     # Composants réutilisables et UI (shadcn)
+│       ├── components/     # Reusable components and UI (shadcn)
 │       ├── contexts/       # SyncContext
 │       ├── hooks/          # use-goals, use-settings, use-language, etc.
 │       ├── lib/            # localStorage, i18n, supabase, basePath
 │       └── pages/          # Landing, Tutorial, Dashboard, GoalDetails, Settings
-├── shared/                 # Schémas et types partagés
+├── shared/                 # Shared schemas and types
 │   ├── schema.ts
 │   └── routes.ts
-├── deploy/                 # Config déploiement (Apache)
-├── supabase/               # Migrations Supabase (sync optionnelle)
+├── deploy/                 # Deployment config (Apache)
+├── supabase/               # Supabase migrations (optional sync)
 ├── vite.config.ts
 ├── package.json
 └── README.md
 ```
 
-## Stack technique
+## Tech stack
 
-- **Build** : Vite 7, React 18, TypeScript
-- **Routing** : Wouter
-- **État serveur / cache** : TanStack React Query
-- **UI** : Tailwind CSS, Radix UI (shadcn), Framer Motion, Lucide React
-- **Formulaires** : react-hook-form, Zod
-- **Données** : localStorage (principal), Supabase (optionnel)
-- **i18n** : fichier de traductions (fr, en, mg) dans `client/src/lib/i18n.ts`
+- **Build**: Vite 7, React 18, TypeScript
+- **Routing**: Wouter
+- **Server state / cache**: TanStack React Query
+- **UI**: Tailwind CSS, Radix UI (shadcn), Framer Motion, Lucide React
+- **Forms**: react-hook-form, Zod
+- **Data**: localStorage (primary), Supabase (optional)
+- **i18n**: translation file (fr, en, mg) in `client/src/lib/i18n.ts`
 
-## Synchronisation cloud (optionnelle)
+## Optional cloud sync
 
-Pour activer la synchronisation Supabase :
+To enable Supabase sync:
 
-1. Créer un projet sur [Supabase](https://supabase.com).
-2. Créer un fichier `.env` à la racine du projet :
+1. Create a project on [Supabase](https://supabase.com).
+2. Create a `.env` file at the project root:
 
    ```
-   VITE_SUPABASE_URL=https://votre-projet.supabase.co
-   VITE_SUPABASE_ANON_KEY=votre_anon_key
+   VITE_SUPABASE_URL=https://your-project.supabase.co
+   VITE_SUPABASE_ANON_KEY=your_anon_key
    ```
 
-3. Exécuter les migrations dans `supabase/migrations/` si nécessaire.
+3. Run migrations in `supabase/migrations/` if needed.
 
-Sans ces variables, l’application fonctionne entièrement en local (localStorage).
+Without these variables, the app runs entirely locally (localStorage).
 
-## Déploiement
+## Deployment
 
-- **Build** : `npm run build` → sortie dans `dist/`.
-- **Base path** : le build utilise `base: "./"` ; il peut être servi à la racine (`/`) ou dans un sous-dossier (ex. `/piggyback/`). Le base path est détecté automatiquement au chargement.
-- **Apache** : voir `deploy/README.md` et `deploy/apache-piggyback.conf` pour la configuration SPA (fallback sur `index.html`).
+- **Build**: `npm run build` → output in `dist/`.
+- **Base path**: the build uses `base: "./"`; it can be served at the root (`/`) or in a subfolder (e.g. `/piggyback/`). Base path is detected automatically on load.
+- **Apache**: see `deploy/README.md` and `deploy/apache-piggyback.conf` for SPA config (fallback to `index.html`).
 
-## Licence
+## License
 
 MIT.
