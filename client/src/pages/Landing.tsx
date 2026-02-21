@@ -16,19 +16,22 @@ import {
 import { useLanguage } from "@/hooks/use-language";
 import { useSettings, useUpdateSettings } from "@/hooks/use-settings";
 import { languages, type Language } from "@/lib/i18n";
-import { useState } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function Landing() {
   const { t, language } = useLanguage();
   const { data: settings } = useSettings();
   const { mutate: updateSettings } = useUpdateSettings();
-  const [showLangMenu, setShowLangMenu] = useState(false);
 
   const handleLanguageChange = (lang: Language) => {
     if (settings) {
       updateSettings({ ...settings, language: lang });
     }
-    setShowLangMenu(false);
   };
 
   const features = [
@@ -90,36 +93,33 @@ export default function Landing() {
               className="flex items-center justify-between md:justify-end gap-2 min-w-0 w-full md:w-auto"
             >
               <div className="flex items-center gap-2">
-                <div className="relative">
-                  <button
-                    onClick={() => setShowLangMenu(!showLangMenu)}
+                <DropdownMenu>
+                  <DropdownMenuTrigger
                     className="flex items-center justify-center gap-1.5 w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 hover:bg-white transition-all text-sm font-medium text-slate-700"
                     aria-label="Changer de langue"
-                    aria-expanded={showLangMenu}
-                    aria-haspopup="listbox"
                   >
                     <Globe className="w-4 h-4" aria-hidden="true" />
                     <span>{languages.find(l => l.code === language)?.flag}</span>
-                  </button>
-                  {showLangMenu && (
-                    <div className="absolute left-0 md:left-auto md:right-0 mt-2 w-40 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50" role="listbox" aria-label="Sélection de langue">
-                      {languages.map((lang) => (
-                        <button
-                          key={lang.code}
-                          onClick={() => handleLanguageChange(lang.code)}
-                          role="option"
-                          aria-selected={language === lang.code}
-                          className={`w-full flex items-center gap-3 px-4 py-2 text-left hover:bg-slate-50 transition-colors ${
-                            language === lang.code ? 'bg-violet-50 text-violet-700' : 'text-slate-700'
-                          }`}
-                        >
-                          <span aria-hidden="true">{lang.flag}</span>
-                          <span className="font-medium">{lang.name}</span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="end"
+                    sideOffset={8}
+                    className="w-44 rounded-xl border-slate-100 py-2 bg-white shadow-xl"
+                  >
+                    {languages.map((lang) => (
+                      <DropdownMenuItem
+                        key={lang.code}
+                        onClick={() => handleLanguageChange(lang.code)}
+                        className={`flex items-center gap-3 cursor-pointer ${
+                          language === lang.code ? "bg-violet-50 text-violet-700" : ""
+                        }`}
+                      >
+                        <span aria-hidden="true">{lang.flag}</span>
+                        <span className="font-medium">{lang.name}</span>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <Link
                   href="/tutorial"
                   className="inline-flex items-center justify-center w-10 h-10 md:w-auto md:px-4 md:py-2 md:gap-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 hover:bg-white text-slate-700 font-medium transition-all text-sm"
