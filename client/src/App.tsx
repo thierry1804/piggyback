@@ -8,6 +8,7 @@ import { OfflineBanner } from "@/components/OfflineBanner";
 import { useSEO } from "@/hooks/use-seo";
 import { useAutoSync } from "@/hooks/use-auto-sync";
 import Landing from "@/pages/Landing";
+import Tutorial from "@/pages/Tutorial";
 import Dashboard from "@/pages/Dashboard";
 import GoalDetails from "@/pages/GoalDetails";
 import Settings from "@/pages/Settings";
@@ -17,6 +18,7 @@ function AppRouter() {
   return (
     <Router base={getBasePath()}>
       <Switch>
+        <Route path="/tutorial" component={Tutorial} />
         <Route path="/" component={Landing} />
         <Route path="/app" component={Dashboard} />
         <Route path="/app/goal/:id" component={GoalDetails} />

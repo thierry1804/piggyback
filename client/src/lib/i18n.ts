@@ -178,6 +178,32 @@ export const translations = {
       twitterDescription: "Reach your savings goals easily. 100% free, 100% private. No sign-up required.",
       keywords: "savings, save money, digital piggy bank, savings goal, savings tracker, budget management, free savings app, money tracker, financial goals",
     },
+    // Tutorial
+    tutorial: {
+      title: "Tutorial",
+      subtitle: "Master Piggyback in 5 minutes",
+      backHome: "Back to home",
+      openApp: "Open app",
+      step1Title: "Get started",
+      step1Desc: "From the home page, click \"Open app\" or \"Launch the app\" to reach your dashboard.",
+      step2Title: "Create a goal",
+      step2Desc: "Click \"Create Goal\". Enter a name and target amount. Optionally set an icon, color, currency, and deadline, then confirm.",
+      step3Title: "Add or withdraw money",
+      step3Desc: "On a goal card use quick add, or open the goal and use \"Add Savings\" or \"Withdraw\". Enter the amount and optional note.",
+      step4Title: "Track progress",
+      step4Desc: "The dashboard shows total savings and overall progress. Click a goal to see its chart and full transaction history.",
+      step5Title: "Settings",
+      step5Desc: "Use the Settings icon to set your currency (code and symbol) and language (EN/FR/MG). Optionally sign in to sync to the cloud.",
+      step6Title: "In a nutshell",
+      step6Desc: "Your data is stored on your device (and optionally in the cloud). The app works offline.",
+      screenshotPlaceholder: "Screenshot",
+      tryInApp: "Try in app",
+      nextStep: "Next",
+      prevStep: "Previous",
+      stepOf: "Step {current} of {total}",
+      mockLandingHint: "Click the button below to open the dashboard.",
+      target: "target",
+    },
     // Common
     common: {
       of: "of",
@@ -353,6 +379,32 @@ export const translations = {
       twitterTitle: "Piggyback - Application d'Épargne Gratuite",
       twitterDescription: "Atteignez vos objectifs d'épargne facilement. 100% gratuit, 100% privé. Sans inscription requise.",
       keywords: "épargne, économiser, tirelire numérique, objectif épargne, suivi épargne, gestion budget, application gratuite épargne, objectifs financiers",
+    },
+    // Tutorial
+    tutorial: {
+      title: "Tutoriel",
+      subtitle: "Maîtrisez Piggyback en 5 minutes",
+      backHome: "Retour à l'accueil",
+      openApp: "Ouvrir l'app",
+      step1Title: "Démarrer",
+      step1Desc: "Depuis l'accueil, cliquez sur « Ouvrir l'app » ou « Lancer l'application » pour accéder au tableau de bord.",
+      step2Title: "Créer un objectif",
+      step2Desc: "Cliquez sur « Créer un objectif ». Saisissez le nom et le montant cible. Optionnel : icône, couleur, devise, échéance, puis validez.",
+      step3Title: "Ajouter ou retirer de l'argent",
+      step3Desc: "Sur la carte d'un objectif utilisez l'ajout rapide, ou ouvrez l'objectif et utilisez « Ajouter des économies » ou « Retirer ». Saisissez le montant et une note optionnelle.",
+      step4Title: "Suivre la progression",
+      step4Desc: "Le tableau de bord affiche le total épargné et la progression globale. Cliquez sur un objectif pour voir son graphique et l'historique des transactions.",
+      step5Title: "Paramètres",
+      step5Desc: "Utilisez l'icône Paramètres pour définir la devise (code et symbole) et la langue (FR/EN/MG). Optionnel : connectez-vous pour synchroniser avec le cloud.",
+      step6Title: "En bref",
+      step6Desc: "Vos données sont stockées sur votre appareil (et optionnellement dans le cloud). L'application fonctionne hors ligne.",
+      screenshotPlaceholder: "Capture d'écran",
+      tryInApp: "Essayer dans l'app",
+      nextStep: "Suivant",
+      prevStep: "Précédent",
+      stepOf: "Étape {current} sur {total}",
+      mockLandingHint: "Cliquez sur le bouton ci-dessous pour accéder au tableau de bord.",
+      target: "cible",
     },
     // Common
     common: {
@@ -530,6 +582,32 @@ export const translations = {
       twitterDescription: "Tratraro ny tanjonao amin'ny fitehirizana mora foana. 100% maimaim-poana, 100% tsiambaratelo.",
       keywords: "fitehirizana, mitahiry vola, vata fitehirizana, tanjona fitehirizana, fanaraha-maso tahiry, fitantanana vola, fampiharana maimaim-poana",
     },
+    // Tutorial
+    tutorial: {
+      title: "Torolalana",
+      subtitle: "Zaraho Piggyback ao anatin'ny 5 minitra",
+      backHome: "Miverina any an-trano",
+      openApp: "Sokafy ny app",
+      step1Title: "Atombohy",
+      step1Desc: "Avy any an-tranon-dapa, tsindrio \"Sokafy ny app\" na \"Atombohy ny app\" mba hidirana any amin'ny dashboard.",
+      step2Title: "Mamorona tanjona",
+      step2Desc: "Tsindrio \"Mamorona Tanjona\". Ampidiro ny anarana sy ny vola kendrena. Raha tianao: kisary, loko, vola, fe-potoana, dia ataovy.",
+      step3Title: "Ampio na maka vola",
+      step3Desc: "Amin'ny karatra tanjona dia ampiasao ny \"Ampio haingana\", na sokafy ny tanjona ary ampiasao \"Ampio tahiry\" na \"Makà vola\". Ampidiro ny vola sy naoty raha tianao.",
+      step4Title: "Araho ny fandrosoana",
+      step4Desc: "Ny dashboard dia mampiseho ny tahiry totaly sy ny fandrosoana. Tsindrio ny tanjona iray mba hahita ny grafika sy ny tantara fifanakalozana.",
+      step5Title: "Fikirana",
+      step5Desc: "Ampiasao ny kisary Fikirana mba hametrahana ny vola (kaody sy marika) sy ny fiteny (MG/FR/EN). Raha tianao: midira mba hampifanarahana any azo antoka.",
+      step6Title: "Famintinana",
+      step6Desc: "Ny data-nao dia voatahiry ao amin'ny fitaovanao (ary raha tianao any azo antoka). Ny app dia miasa tsy misy internet.",
+      screenshotPlaceholder: "Sary",
+      tryInApp: "Andramo ao amin'ny app",
+      nextStep: "Manaraka",
+      prevStep: "Teny aloha",
+      stepOf: "Dingana {current} amin'ny {total}",
+      mockLandingHint: "Tsindrio ny bokotra eto ambany mba hidirana any amin'ny dashboard.",
+      target: "tanjona",
+    },
     // Common
     common: {
       of: "amin'ny",
@@ -544,6 +622,8 @@ type DeepStringify<T> = {
 
 export type Translations = DeepStringify<typeof translations.en>;
 
-export function getTranslation(lang: Language): Translations {
+function getTranslation(lang: Language): Translations {
   return translations[lang] as Translations;
 }
+
+export { getTranslation };

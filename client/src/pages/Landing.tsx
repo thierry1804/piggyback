@@ -10,7 +10,8 @@ import {
   Wallet,
   LineChart,
   Shield,
-  Globe
+  Globe,
+  BookOpen,
 } from "lucide-react";
 import { useLanguage } from "@/hooks/use-language";
 import { useSettings, useUpdateSettings } from "@/hooks/use-settings";
@@ -60,7 +61,7 @@ export default function Landing() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-violet-50/30 to-emerald-50/20 overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-violet-50/30 to-emerald-50/20 overflow-x-hidden overflow-y-auto">
       {/* Animated Background Elements - decorative, hidden from screen readers */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
         <div className="absolute top-20 left-10 w-72 h-72 bg-violet-300/20 rounded-full blur-3xl animate-pulse" />
@@ -68,66 +69,73 @@ export default function Landing() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-amber-200/10 rounded-full blur-3xl" />
       </div>
 
-      {/* Header with Navigation */}
-      <header className="relative z-50">
-        <nav className="px-6 py-6 max-w-7xl mx-auto" aria-label="Navigation principale">
-          <div className="flex items-center justify-between">
+      {/* Header with Navigation - 2 lignes sur mobile pour éviter débordement */}
+      <header className="relative z-50 overflow-x-hidden">
+        <nav className="px-4 sm:px-6 py-4 sm:py-6 max-w-7xl mx-auto" aria-label="Navigation principale">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-0">
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="flex items-center gap-3"
+              className="flex items-center gap-2 sm:gap-3 flex-shrink-0"
             >
-              <div className="w-12 h-12 bg-gradient-to-br from-violet-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg shadow-violet-500/25" aria-hidden="true">
-                <PiggyBank className="w-7 h-7 text-white" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-violet-500 to-violet-600 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg shadow-violet-500/25 flex-shrink-0" aria-hidden="true">
+                <PiggyBank className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
               </div>
-              <span className="text-2xl font-bold text-slate-800 tracking-tight font-display">Piggyback</span>
+              <span className="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight font-display">Piggyback</span>
             </motion.div>
             
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="flex items-center gap-3"
+              className="flex items-center justify-between md:justify-end gap-2 min-w-0 w-full md:w-auto"
             >
-              {/* Language Selector */}
-              <div className="relative">
-                <button
-                  onClick={() => setShowLangMenu(!showLangMenu)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 hover:bg-white transition-all text-sm font-medium text-slate-700"
-                  aria-label="Changer de langue"
-                  aria-expanded={showLangMenu}
-                  aria-haspopup="listbox"
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <button
+                    onClick={() => setShowLangMenu(!showLangMenu)}
+                    className="flex items-center justify-center gap-1.5 w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 hover:bg-white transition-all text-sm font-medium text-slate-700"
+                    aria-label="Changer de langue"
+                    aria-expanded={showLangMenu}
+                    aria-haspopup="listbox"
+                  >
+                    <Globe className="w-4 h-4" aria-hidden="true" />
+                    <span>{languages.find(l => l.code === language)?.flag}</span>
+                  </button>
+                  {showLangMenu && (
+                    <div className="absolute left-0 md:left-auto md:right-0 mt-2 w-40 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50" role="listbox" aria-label="Sélection de langue">
+                      {languages.map((lang) => (
+                        <button
+                          key={lang.code}
+                          onClick={() => handleLanguageChange(lang.code)}
+                          role="option"
+                          aria-selected={language === lang.code}
+                          className={`w-full flex items-center gap-3 px-4 py-2 text-left hover:bg-slate-50 transition-colors ${
+                            language === lang.code ? 'bg-violet-50 text-violet-700' : 'text-slate-700'
+                          }`}
+                        >
+                          <span aria-hidden="true">{lang.flag}</span>
+                          <span className="font-medium">{lang.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <Link
+                  href="/tutorial"
+                  className="inline-flex items-center justify-center w-10 h-10 md:w-auto md:px-4 md:py-2 md:gap-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 hover:bg-white text-slate-700 font-medium transition-all text-sm"
+                  aria-label={t.tutorial.title}
                 >
-                  <Globe className="w-4 h-4" aria-hidden="true" />
-                  <span>{languages.find(l => l.code === language)?.flag}</span>
-                </button>
-                
-                {showLangMenu && (
-                  <div className="absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50" role="listbox" aria-label="Sélection de langue">
-                    {languages.map((lang) => (
-                      <button
-                        key={lang.code}
-                        onClick={() => handleLanguageChange(lang.code)}
-                        role="option"
-                        aria-selected={language === lang.code}
-                        className={`w-full flex items-center gap-3 px-4 py-2 text-left hover:bg-slate-50 transition-colors ${
-                          language === lang.code ? 'bg-violet-50 text-violet-700' : 'text-slate-700'
-                        }`}
-                      >
-                        <span aria-hidden="true">{lang.flag}</span>
-                        <span className="font-medium">{lang.name}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
+                  <BookOpen className="w-4 h-4" aria-hidden="true" />
+                  <span className="hidden md:inline">{t.tutorial.title}</span>
+                </Link>
               </div>
-
               <Link 
                 href="/app" 
-                className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-full transition-all hover:shadow-xl hover:shadow-slate-900/20 hover:-translate-y-0.5"
-                aria-label="Ouvrir l'application Piggyback"
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 md:px-6 md:py-3 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-full transition-all hover:shadow-xl hover:shadow-slate-900/20 text-sm md:text-base flex-shrink-0"
+                aria-label={t.landing.openApp}
               >
                 {t.landing.openApp}
-                <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                <ArrowRight className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
               </Link>
             </motion.div>
           </div>
@@ -169,12 +177,12 @@ export default function Landing() {
                 {t.landing.getStarted}
               </Link>
               
-              <a 
-                href="#features"
+              <Link 
+                href="/tutorial"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/80 backdrop-blur-sm hover:bg-white text-slate-700 font-semibold text-lg rounded-2xl border border-slate-200 transition-all hover:shadow-lg"
               >
                 {t.landing.learnMore}
-              </a>
+              </Link>
             </div>
 
             <ul className="flex items-center gap-8 pt-4" aria-label="Avantages de Piggyback">

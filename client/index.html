@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="fr">
   <head>
-    <!-- Base dynamique : sur une URL profonde (/piggyback/app/goal/1), les relatifs (assets, manifest) doivent pointer vers la racine de l'app (/piggyback/) -->
+    <!-- Base dynamique : sur une URL profonde (/piggyback/app/goal/1), les relatifs (assets, manifest) doivent pointer vers la racine de l'app (/piggyback/). Ne pas utiliser "app" ni "tutorial" comme base (ce sont des routes SPA). -->
     <script>
       (function(){
         var p = location.pathname;
         var m = p.match(/^(\/[^/]+)/);
-        var base = (m && m[1] !== '/') ? m[1] + '/' : '/';
+        var firstSegment = m ? m[1].slice(1) : '';
+        var isAppRoute = firstSegment === 'app' || firstSegment === 'tutorial';
+        var base = (firstSegment && !isAppRoute) ? '/' + firstSegment + '/' : '/';
         var b = document.createElement('base');
         b.href = location.origin + base;
         document.head.insertBefore(b, document.head.firstChild);

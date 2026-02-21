@@ -5,7 +5,7 @@ import { GoalCard } from "@/components/GoalCard";
 import { CreateGoalDialog } from "@/components/CreateGoalDialog";
 import { TransactionDialog } from "@/components/TransactionDialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Loader2, TrendingUp, PiggyBank, Settings as SettingsIcon, Cloud } from "lucide-react";
+import { Loader2, TrendingUp, PiggyBank, Settings as SettingsIcon, Cloud, BookOpen } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Goal } from "@/lib/localStorage";
 import { useSettings } from "@/hooks/use-settings";
@@ -94,6 +94,13 @@ export default function Dashboard() {
             <p className="text-lg text-muted-foreground font-medium">{t.dashboard.tagline}</p>
           </div>
           <div className="flex items-center gap-3">
+            <Link
+              href="/tutorial"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-foreground/70 hover:text-foreground hover:bg-muted transition-colors"
+            >
+              <BookOpen className="w-5 h-5" />
+              <span className="hidden sm:inline">{t.tutorial.title}</span>
+            </Link>
             <Link
               href="/app/settings"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-foreground/70 hover:text-foreground hover:bg-muted transition-colors"
