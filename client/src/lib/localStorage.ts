@@ -11,6 +11,7 @@ export interface Goal {
   currencySymbol: string;
   createdAt: string; // ISO date string
   deadline: string | null; // ISO date string, optionnel
+  closedAt?: string | null; // ISO date, présent après clôture (Premium)
 }
 
 export interface Transaction {
@@ -291,8 +292,9 @@ class LocalStorageService {
     const settings = this.getSettings();
     if (settings.currencyCode === "USD" || settings.currencySymbol === "$") {
       this.setSettings({
+        ...settings,
         currencyCode: "MGA",
-        currencySymbol: "Ar"
+        currencySymbol: "Ar",
       });
     }
   }

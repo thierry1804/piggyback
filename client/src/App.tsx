@@ -12,6 +12,8 @@ import Tutorial from "@/pages/Tutorial";
 import Dashboard from "@/pages/Dashboard";
 import GoalDetails from "@/pages/GoalDetails";
 import Settings from "@/pages/Settings";
+import Join from "@/pages/Join";
+import ShareGoal from "@/pages/ShareGoal";
 import NotFound from "@/pages/NotFound";
 
 function AppRouter() {
@@ -23,6 +25,8 @@ function AppRouter() {
         <Route path="/app" component={Dashboard} />
         <Route path="/app/goal/:id" component={GoalDetails} />
         <Route path="/app/settings" component={Settings} />
+        <Route path="/app/join" component={Join} />
+        <Route path="/share/:token" component={ShareGoal} />
         <Route component={NotFound} />
       </Switch>
     </Router>

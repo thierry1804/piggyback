@@ -282,6 +282,14 @@ export async function syncSupabaseToLocal(
   if (!c) throw new Error("Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY");
   const groupId = await ensureUserHasGroup(c);
 
+  const { data: aboRow, error: aboError } = await c
+    .from("abonnements")
+    .select("plan_id")
+    .eq("group_id", groupId)
+    .maybeSingle();
+  if (aboError) throw aboError;
+  const planFromCloud = (aboRow?.plan_id as string) === "premium" ? "premium" : "free";
+
   const { data: goalsRows, error: goalsError } = await c
     .from("goals")
     .select("*")
@@ -300,6 +308,7 @@ export async function syncSupabaseToLocal(
     currencySymbol: (row.currencySymbol as string) ?? "Ar",
     createdAt: row.createdAt != null ? String(row.createdAt) : new Date().toISOString(),
     deadline: row.deadline != null ? String(row.deadline) : null,
+    closedAt: row.closed_at != null ? String(row.closed_at) : null,
   }));
 
   const goalIds = goals.map((g) => g.id);
@@ -335,5 +344,168 @@ export async function syncSupabaseToLocal(
   localStorageService.setTransactions([]);
   localStorageService.setGoals(goals);
   localStorageService.setTransactions(transactions);
-  localStorageService.setSettings({ currencyCode, currencySymbol, language });
+  localStorageService.setSettings({ currencyCode, currencySymbol, language, plan: planFromCloud });
+}
+
+/**
+ * Passe le groupe de l'utilisateur connecté en Premium (RPC).
+ * À appeler après validation paiement ou pour simulation.
+ */
+export async function upgradeGroupToPremium(
+  client?: SupabaseClient | null
+): Promise<void> {
+  const c = client ?? getSupabase();
+  if (!c) throw new Error("Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY");
+  const { error } = await c.rpc("upgrade_group_to_premium");
+  if (error) {
+    const enriched = new Error(error.message) as Error & { code?: string; details?: string; hint?: string };
+    enriched.code = error.code;
+    enriched.details = error.details;
+    enriched.hint = error.hint;
+    throw enriched;
+  }
+}
+
+export type GroupRole = "admin" | "contributor" | "observer";
+
+export async function getMyGroupId(
+  client?: SupabaseClient | null
+): Promise<string | null> {
+  const c = client ?? getSupabase();
+  if (!c) return null;
+  const { data, error } = await c.rpc("get_my_group_id");
+  if (error || data == null) return null;
+  return data as string;
+}
+
+export async function getMyGroupRole(
+  client?: SupabaseClient | null
+): Promise<GroupRole | null> {
+  const c = client ?? getSupabase();
+  if (!c) return null;
+  const { data, error } = await c.rpc("get_my_group_role");
+  if (error || data == null) return null;
+  return data as GroupRole;
+}
+
+export async function getGroupMembers(
+  groupId: string,
+  client?: SupabaseClient | null
+): Promise<{ user_id: string; role: string }[]> {
+  const c = client ?? getSupabase();
+  if (!c) return [];
+  const { data, error } = await c.rpc("get_group_members", { p_group_id: groupId });
+  if (error || !Array.isArray(data)) return [];
+  return data as { user_id: string; role: string }[];
+}
+
+export async function inviteToGroup(
+  groupId: string,
+  email: string,
+  role: GroupRole,
+  expiresInDays: number,
+  client?: SupabaseClient | null
+): Promise<{ id: string; token: string }> {
+  const c = client ?? getSupabase();
+  if (!c) throw new Error("Missing Supabase client");
+  const { data, error } = await c.rpc("invite_to_group", {
+    p_group_id: groupId,
+    p_email: email,
+    p_role: role,
+    p_expires_in_days: expiresInDays,
+  });
+  if (error) throw error;
+  return data as { id: string; token: string };
+}
+
+export async function acceptInvitation(token: string, client?: SupabaseClient | null): Promise<string> {
+  const c = client ?? getSupabase();
+  if (!c) throw new Error("Missing Supabase client");
+  const { data, error } = await c.rpc("accept_invitation", { p_token: token });
+  if (error) throw error;
+  return data as string;
+}
+
+export interface GoalEvent {
+  id: string;
+  goal_id: number;
+  group_id: string;
+  event_type: string;
+  payload: Record<string, unknown>;
+  user_id: string | null;
+  created_at: string;
+}
+
+export async function closeGoal(
+  goalId: number,
+  client?: SupabaseClient | null
+): Promise<void> {
+  const c = client ?? getSupabase();
+  if (!c) throw new Error("Missing Supabase client");
+  const { error } = await c.rpc("close_goal", { p_goal_id: goalId });
+  if (error) throw error;
+}
+
+export async function createGoalShareLink(
+  goalId: number,
+  expiresInDays: number | null,
+  client?: SupabaseClient | null
+): Promise<{ id: string; token: string }> {
+  const c = client ?? getSupabase();
+  if (!c) throw new Error("Missing Supabase client");
+  const { data, error } = await c.rpc("create_goal_share_link", {
+    p_goal_id: goalId,
+    p_expires_in_days: expiresInDays,
+  });
+  if (error) throw error;
+  return data as { id: string; token: string };
+}
+
+export async function getGoalByShareToken(
+  token: string,
+  client?: SupabaseClient | null
+): Promise<{ goal: Goal; transactions: Transaction[] } | null> {
+  const c = client ?? getSupabase();
+  if (!c) return null;
+  const { data, error } = await c.rpc("get_goal_by_share_token", { p_token: token });
+  if (error || data == null) return null;
+  const d = data as { goal: Record<string, unknown>; transactions: Record<string, unknown>[] };
+  const goal: Goal = {
+    id: d.goal.id as number,
+    name: d.goal.name as string,
+    description: (d.goal.description as string | null) ?? null,
+    targetAmount: Number(d.goal.targetAmount),
+    currentAmount: Number(d.goal.currentAmount),
+    icon: (d.goal.icon as string) ?? "🐷",
+    color: (d.goal.color as string) ?? "blue",
+    currencyCode: (d.goal.currencyCode as string) ?? "MGA",
+    currencySymbol: (d.goal.currencySymbol as string) ?? "Ar",
+    createdAt: d.goal.createdAt != null ? String(d.goal.createdAt) : new Date().toISOString(),
+    deadline: d.goal.deadline != null ? String(d.goal.deadline) : null,
+    closedAt: d.goal.closed_at != null ? String(d.goal.closed_at) : null,
+  };
+  const transactions: Transaction[] = (d.transactions ?? []).map((row: Record<string, unknown>) => ({
+    id: row.id as number,
+    goalId: row.goalId as number,
+    amount: Number(row.amount),
+    note: (row.note as string | null) ?? null,
+    createdAt: row.createdAt != null ? String(row.createdAt) : new Date().toISOString(),
+  }));
+  return { goal, transactions };
+}
+
+export async function getGoalEvents(
+  goalId: number,
+  client?: SupabaseClient | null
+): Promise<GoalEvent[]> {
+  const c = client ?? getSupabase();
+  if (!c) return [];
+  const { data, error } = await c
+    .from("goal_events")
+    .select("*")
+    .eq("goal_id", goalId)
+    .order("created_at", { ascending: false })
+    .limit(100);
+  if (error) return [];
+  return (data ?? []) as GoalEvent[];
 }

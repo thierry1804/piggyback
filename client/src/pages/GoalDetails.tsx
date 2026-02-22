@@ -10,7 +10,8 @@ import {
   TrendingDown, 
   Calendar,
   AlertCircle,
-  Lightbulb
+  Lightbulb,
+  FileDown
 } from "lucide-react";
 import { useState } from "react";
 import { format, isPast, differenceInDays } from "date-fns";
@@ -31,6 +32,14 @@ import { cn } from "@/lib/utils";
 import { useSettings } from "@/hooks/use-settings";
 import { useLanguage } from "@/hooks/use-language";
 import { useSyncFromCloud } from "@/contexts/SyncContext";
+import { useGroupRole } from "@/hooks/use-group-role";
+import { useSession } from "@/hooks/use-auth";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getGoalEvents, closeGoal } from "@/lib/supabase";
+import { useToast } from "@/hooks/use-toast";
+import { exportGoalToPdf, exportGoalToExcel } from "@/lib/exportGoal";
+import { createGoalShareLink } from "@/lib/supabase";
+import { getBasePath } from "@/lib/basePath";
 
 export default function GoalDetails() {
   const [, params] = useRoute("/app/goal/:id");
@@ -40,8 +49,73 @@ export default function GoalDetails() {
   const { mutate: deleteGoal } = useDeleteGoal();
   const { data: settings } = useSettings();
   const { isSyncingFromCloud } = useSyncFromCloud();
+  const { canEdit, role } = useGroupRole();
+  const { isSignedIn } = useSession();
   const { t } = useLanguage();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { setSyncingFromCloud } = useSyncFromCloud();
   const currencySymbol = settings?.currencySymbol || "Ar";
+  const [closePending, setClosePending] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [shareLink, setShareLink] = useState<string | null>(null);
+  const [sharePending, setSharePending] = useState(false);
+  const { data: events } = useQuery({
+    queryKey: ["goalEvents", id],
+    queryFn: () => getGoalEvents(id),
+    enabled: isSignedIn && settings?.plan === "premium",
+  });
+  const eventLabel = (eventType: string) => {
+    if (eventType === "goal_created") return t.goalDetails.eventGoalCreated;
+    if (eventType === "goal_updated") return t.goalDetails.eventGoalUpdated;
+    if (eventType === "transaction_added") return t.goalDetails.eventTransactionAdded;
+    if (eventType === "goal_closed") return t.goalDetails.closeGoal;
+    return eventType;
+  };
+  const handleCreateShareLink = () => {
+    setSharePending(true);
+    setShareLink(null);
+    createGoalShareLink(id, 7)
+      .then(({ token: t }) => {
+        const base = typeof window !== "undefined" ? window.location.origin + getBasePath() : "";
+        setShareLink(`${base}/share/${t}`);
+      })
+      .catch((err) => {
+        toast({
+          title: t.settings.error,
+          description: err instanceof Error ? err.message : String(err),
+          variant: "destructive",
+        });
+      })
+      .finally(() => setSharePending(false));
+  };
+  const handleCopyShareLink = () => {
+    if (shareLink) {
+      navigator.clipboard.writeText(shareLink);
+      toast({ title: t.goalDetails.shareLinkCopied });
+    }
+  };
+  const handleCloseGoal = () => {
+    setClosePending(true);
+    closeGoal(id)
+      .then(async () => {
+        const { syncSupabaseToLocal } = await import("@/lib/supabase");
+        setSyncingFromCloud(true);
+        await syncSupabaseToLocal();
+        setSyncingFromCloud(false);
+        queryClient.invalidateQueries({ queryKey: ["goals"] });
+        queryClient.invalidateQueries({ queryKey: ["goal", id] });
+        toast({ title: t.goalDetails.closeGoal });
+      })
+      .catch((err) => {
+        toast({
+          title: t.settings.error,
+          description: err instanceof Error ? err.message : String(err),
+          variant: "destructive",
+        });
+      })
+      .finally(() => setClosePending(false));
+  };
   
   const [transactionModal, setTransactionModal] = useState<{
     open: boolean;
@@ -100,6 +174,14 @@ export default function GoalDetails() {
             <p className="text-sm font-medium">{t.settings.loadingFromCloud}</p>
           </div>
         )}
+        {goal.closedAt && (
+          <div className="mb-6 flex items-center gap-3 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800">
+            <AlertCircle className="w-5 h-5 shrink-0" />
+            <p className="text-sm font-medium">
+              {t.goalDetails.goalClosedAt} {format(new Date(goal.closedAt), "MMM d, yyyy")}
+            </p>
+          </div>
+        )}
         {/* Nav */}
         <div className="flex items-center justify-between mb-8">
           <Link href="/app" className="
@@ -110,6 +192,7 @@ export default function GoalDetails() {
             {t.goalDetails.backToDashboard}
           </Link>
 
+          {canEdit && !goal.closedAt && (
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <button className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors">
@@ -131,6 +214,7 @@ export default function GoalDetails() {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
+          )}
         </div>
 
         {/* Hero Card */}
@@ -210,6 +294,7 @@ export default function GoalDetails() {
           </div>
 
           {/* Action Buttons */}
+          {canEdit && !goal.closedAt && (
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-8 sm:mt-10">
             <button
               onClick={() => setTransactionModal({ open: true, type: "deposit" })}
@@ -224,7 +309,68 @@ export default function GoalDetails() {
               {t.goalDetails.withdraw}
             </button>
           </div>
+          )}
+          {settings?.plan === "premium" && canEdit && !goal.closedAt && isSignedIn && (
+            <div className="mt-6">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <button
+                    type="button"
+                    disabled={closePending}
+                    className="text-sm text-muted-foreground hover:text-foreground underline disabled:opacity-50"
+                  >
+                    {closePending ? (
+                      <Loader2 className="w-4 h-4 animate-spin inline mr-1" />
+                    ) : null}
+                    {t.goalDetails.closeGoal}
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="rounded-2xl">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>{t.goalDetails.closeGoal}</AlertDialogTitle>
+                    <AlertDialogDescription>{t.goalDetails.closeGoalConfirm}</AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="rounded-xl">{t.goalDetails.cancel}</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleCloseGoal} className="rounded-xl">
+                      {t.goalDetails.closeGoal}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          )}
         </div>
+
+        {settings?.plan === "premium" && (
+          <div className="flex flex-wrap gap-2 mb-6">
+            <button
+              type="button"
+              onClick={() => exportGoalToPdf(goal, currencySymbol)}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-border bg-white text-sm font-medium hover:bg-muted/50"
+            >
+              <FileDown className="w-4 h-4" />
+              {t.goalDetails.exportPdf}
+            </button>
+            <button
+              type="button"
+              onClick={() => exportGoalToExcel(goal, currencySymbol)}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-border bg-white text-sm font-medium hover:bg-muted/50"
+            >
+              <FileDown className="w-4 h-4" />
+              {t.goalDetails.exportExcel}
+            </button>
+            {role === "admin" && !goal.closedAt && (
+              <button
+                type="button"
+                onClick={() => { setShareModalOpen(true); setShareLink(null); }}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-border bg-white text-sm font-medium hover:bg-muted/50"
+              >
+                {t.goalDetails.shareGoal}
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Transaction History */}
         <section>
@@ -277,6 +423,26 @@ export default function GoalDetails() {
             )}
           </div>
         </section>
+
+        {settings?.plan === "premium" && isSignedIn && events && events.length > 0 && (
+          <section className="mt-10">
+            <h2 className="text-xl font-bold mb-4 font-display flex items-center gap-2">
+              {t.goalDetails.journal}
+            </h2>
+            <div className="bg-white rounded-3xl border border-border/50 shadow-sm overflow-hidden">
+              <ul className="divide-y divide-border/50">
+                {events.map((ev) => (
+                  <li key={ev.id} className="p-4 flex items-center justify-between text-sm">
+                    <span className="font-medium text-foreground">{eventLabel(ev.event_type)}</span>
+                    <span className="text-muted-foreground">
+                      {format(new Date(ev.created_at), "MMM d, yyyy HH:mm")}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
+        )}
       </div>
 
       <TransactionDialog
@@ -286,6 +452,42 @@ export default function GoalDetails() {
         goalName={goal.name}
         type={transactionModal.type}
       />
+
+      <AlertDialog open={shareModalOpen} onOpenChange={setShareModalOpen}>
+        <AlertDialogContent className="rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t.goalDetails.shareGoal}</AlertDialogTitle>
+            <AlertDialogDescription>
+              Create a read-only link valid for 7 days. Anyone with the link can view this goal.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-3 py-2">
+            {shareLink && (
+              <div className="p-3 rounded-lg bg-muted text-sm break-all">{shareLink}</div>
+            )}
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={handleCreateShareLink}
+                disabled={sharePending}
+                className="px-4 py-2 rounded-xl bg-primary text-white text-sm font-medium disabled:opacity-50"
+              >
+                {sharePending ? <Loader2 className="w-4 h-4 animate-spin inline" /> : null}
+                {t.goalDetails.shareGoalCreate}
+              </button>
+              {shareLink && (
+                <button
+                  type="button"
+                  onClick={handleCopyShareLink}
+                  className="px-4 py-2 rounded-xl border border-border text-sm font-medium"
+                >
+                  Copy
+                </button>
+              )}
+            </div>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

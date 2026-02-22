@@ -16,6 +16,7 @@ import {
   Crown,
 } from "lucide-react";
 import { useLanguage } from "@/hooks/use-language";
+import { useSession } from "@/hooks/use-auth";
 import { useSettings, useUpdateSettings } from "@/hooks/use-settings";
 import { languages, type Language } from "@/lib/i18n";
 import {
@@ -27,6 +28,7 @@ import {
 
 export default function Landing() {
   const { t, language } = useLanguage();
+  const { isSignedIn } = useSession();
   const { data: settings } = useSettings();
   const { mutate: updateSettings } = useUpdateSettings();
 
@@ -450,9 +452,13 @@ export default function Landing() {
                     </li>
                   ))}
                 </ul>
-                <span className="inline-flex items-center justify-center gap-2 w-full py-3 rounded-xl font-semibold bg-slate-100 text-slate-500 cursor-default">
-                  {t.landing.upgradeComingSoon}
-                </span>
+                <Link
+                  href="/app/settings?upgrade=1"
+                  className="inline-flex items-center justify-center gap-2 w-full py-3 rounded-xl font-semibold bg-violet-600 text-white hover:bg-violet-500 transition-colors"
+                >
+                  {isSignedIn ? t.settings.upgradeToPremium : t.landing.getPremium}
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
               </motion.article>
 
               <motion.article
