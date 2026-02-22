@@ -7,6 +7,7 @@ const defaultSettings: Settings = {
   currencyCode: 'MGA',
   currencySymbol: 'Ar',
   language: 'en',
+  plan: 'free',
 };
 
 export function useSettings() {

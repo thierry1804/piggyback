@@ -21,10 +21,14 @@ export interface Transaction {
   createdAt: string; // ISO date string
 }
 
+export type Plan = "free" | "premium";
+
 export interface Settings {
   currencyCode: string;
   currencySymbol: string;
   language: "en" | "fr" | "mg";
+  /** Plan : gratuit (mono goal) ou premium (illimité). Défaut : "free". */
+  plan?: Plan;
 }
 
 export interface SyncMetadata {
@@ -66,10 +70,17 @@ class LocalStorageService {
     return { ...goal, transactions };
   }
 
+  static readonly FREE_TIER_MAX_GOALS = 1;
+
   createGoal(goalData: Omit<Goal, 'id' | 'createdAt' | 'currentAmount'>): Goal {
     const goals = this.getGoals();
+    const settings = this.getSettings();
+    const plan = settings.plan ?? "free";
+    if (plan !== "premium" && goals.length >= LocalStorageService.FREE_TIER_MAX_GOALS) {
+      throw new Error("FREE_LIMIT_ONE_GOAL");
+    }
     const nextId = this.getNextGoalId();
-    
+
     const newGoal: Goal = {
       ...goalData,
       id: nextId,
@@ -138,28 +149,27 @@ class LocalStorageService {
   getSettings(): Settings {
     const data = localStorage.getItem(STORAGE_KEYS.SETTINGS);
     if (!data) {
-      // Valeurs par défaut
       const defaultSettings: Settings = {
         currencyCode: 'MGA',
         currencySymbol: 'Ar',
         language: 'en',
+        plan: 'free',
       };
       this.setSettings(defaultSettings);
       return defaultSettings;
     }
     try {
       const settings = JSON.parse(data) as Settings;
-      // Ajouter la langue par défaut si elle n'existe pas
-      if (!settings.language) {
-        settings.language = 'en';
-        this.setSettings(settings);
-      }
+      if (!settings.language) settings.language = 'en';
+      if (settings.plan !== 'free' && settings.plan !== 'premium') settings.plan = 'free';
+      this.setSettings(settings);
       return settings;
     } catch {
       const defaultSettings: Settings = {
         currencyCode: 'MGA',
         currencySymbol: 'Ar',
         language: 'en',
+        plan: 'free',
       };
       this.setSettings(defaultSettings);
       return defaultSettings;
@@ -287,42 +297,47 @@ class LocalStorageService {
     }
   }
 
-  // Initialisation avec des données de démo si vide
+  // Initialisation avec des données de démo si vide (1 goal si free, 3 si premium)
   initializeDemoData(): void {
-    // D'abord, migrer les données existantes vers MGA
     this.migrateToMGA();
-    
+
     const goals = this.getGoals();
-    if (goals.length === 0) {
-      this.createGoal({
-        name: "New Bike 🚲",
-        description: "Saving up for a mountain bike",
-        targetAmount: 50000, // Ar 500.00
-        icon: "🚲",
-        color: "emerald",
-        currencyCode: "MGA",
-        currencySymbol: "Ar",
-        deadline: null
-      });
+    if (goals.length > 0) return;
+
+    const settings = this.getSettings();
+    const isPremium = settings.plan === "premium";
+
+    this.createGoal({
+      name: "New Bike 🚲",
+      description: "Saving up for a mountain bike",
+      targetAmount: 50000,
+      icon: "🚲",
+      color: "emerald",
+      currencyCode: "MGA",
+      currencySymbol: "Ar",
+      deadline: null,
+    });
+
+    if (isPremium) {
       this.createGoal({
         name: "Vacation 🏖️",
         description: "Trip to Hawaii",
-        targetAmount: 200000, // Ar 2000.00
+        targetAmount: 200000,
         icon: "🏖️",
         color: "blue",
         currencyCode: "MGA",
         currencySymbol: "Ar",
-        deadline: null
+        deadline: null,
       });
       this.createGoal({
         name: "Emergency Fund 🚑",
         description: "Rainy day savings",
-        targetAmount: 100000, // Ar 1000.00
+        targetAmount: 100000,
         icon: "🚑",
         color: "red",
         currencyCode: "MGA",
         currencySymbol: "Ar",
-        deadline: null
+        deadline: null,
       });
     }
   }

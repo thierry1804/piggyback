@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useCreateGoal } from "@/hooks/use-goals";
+import { useState } from "react";
+import { useCreateGoal, useGoals } from "@/hooks/use-goals";
 import { useSettings } from "@/hooks/use-settings";
 import { useLanguage } from "@/hooks/use-language";
 import { CurrencyInput } from "./CurrencyInput";
@@ -26,10 +26,14 @@ export function CreateGoalDialog() {
   const [color, setColor] = useState("blue");
   const [deadline, setDeadline] = useState<string>("");
   const { data: settings } = useSettings();
+  const { data: goals } = useGoals();
   const { t } = useLanguage();
   const currencyCode = settings?.currencyCode || "MGA";
   const currencySymbol = settings?.currencySymbol || "Ar";
-  
+
+  const plan = settings?.plan ?? "free";
+  const freeLimitReached = plan === "free" && (goals?.length ?? 0) >= 1;
+
   const { mutate, isPending } = useCreateGoal();
   const { toast } = useToast();
 
@@ -63,11 +67,20 @@ export function CreateGoalDialog() {
           resetForm();
         },
         onError: (err) => {
-          toast({
-            title: t.settings.error,
-            description: err.message,
-            variant: "destructive",
-          });
+          const message = (err as Error).message;
+          if (message === "FREE_LIMIT_ONE_GOAL") {
+            toast({
+              title: t.dialogs.freeLimitTitle,
+              description: t.dialogs.freeLimitReached,
+              variant: "destructive",
+            });
+          } else {
+            toast({
+              title: t.settings.error,
+              description: message,
+              variant: "destructive",
+            });
+          }
         },
       }
     );
@@ -89,6 +102,22 @@ export function CreateGoalDialog() {
       </DialogTrigger>
       
       <DialogContent className="w-[95%] sm:max-w-md rounded-2xl sm:rounded-3xl p-0 overflow-hidden border-0 max-h-[90vh] flex flex-col">
+        {freeLimitReached ? (
+          <div className="p-5 sm:p-6">
+            <DialogHeader className="mb-6">
+              <DialogTitle className="text-2xl font-display font-bold">{t.dialogs.freeLimitTitle}</DialogTitle>
+              <DialogDescription>{t.dialogs.freeLimitReached}</DialogDescription>
+            </DialogHeader>
+            <button
+              type="button"
+              onClick={() => setIsOpen(false)}
+              className="w-full px-4 py-3 rounded-xl font-semibold text-foreground/70 hover:bg-muted transition-colors"
+            >
+              {t.goalDetails.cancel}
+            </button>
+          </div>
+        ) : (
+          <>
         <div className={cn("h-24 sm:h-32 w-full flex-shrink-0 flex items-center justify-center transition-colors duration-300", 
           `bg-${color === 'blue' ? 'blue' : color === 'green' ? 'emerald' : color === 'red' ? 'rose' : color}-100`
         )}>
@@ -198,6 +227,8 @@ export function CreateGoalDialog() {
             </div>
           </form>
         </div>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );

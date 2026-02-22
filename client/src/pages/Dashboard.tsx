@@ -19,6 +19,10 @@ export default function Dashboard() {
   const { t } = useLanguage();
   const [quickAddGoal, setQuickAddGoal] = useState<Goal | null>(null);
 
+  const plan = settings?.plan ?? "free";
+  const displayGoals =
+    plan === "premium" ? (goals ?? []) : (goals ?? []).slice(0, 1);
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -79,8 +83,8 @@ export default function Dashboard() {
     );
   }
 
-  const totalSaved = goals?.reduce((acc, goal) => acc + goal.currentAmount, 0) || 0;
-  const totalTarget = goals?.reduce((acc, goal) => acc + goal.targetAmount, 0) || 0;
+  const totalSaved = displayGoals.reduce((acc, goal) => acc + goal.currentAmount, 0);
+  const totalTarget = displayGoals.reduce((acc, goal) => acc + goal.targetAmount, 0);
   const progressPercentage = totalTarget > 0 ? (totalSaved / totalTarget) * 100 : 0;
   const defaultCurrency = settings?.currencySymbol || "Ar";
 
@@ -167,7 +171,7 @@ export default function Dashboard() {
                 <p className="text-sm font-medium">{t.settings.syncing}</p>
               </div>
             </div>
-          ) : goals?.length === 0 ? (
+          ) : displayGoals.length === 0 ? (
             <div className="text-center py-20 bg-card border border-border/50 rounded-3xl border-dashed">
               <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
                 🌱
@@ -178,7 +182,7 @@ export default function Dashboard() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {goals?.map((goal, index) => (
+              {displayGoals.map((goal, index) => (
                 <motion.div
                   key={goal.id}
                   initial={{ opacity: 0, scale: 0.95 }}

@@ -12,6 +12,8 @@ import {
   Shield,
   Globe,
   BookOpen,
+  Zap,
+  Crown,
 } from "lucide-react";
 import { useLanguage } from "@/hooks/use-language";
 import { useSettings, useUpdateSettings } from "@/hooks/use-settings";
@@ -368,6 +370,115 @@ export default function Landing() {
           </ol>
         </div>
       </section>
+
+        {/* Pricing / Plans */}
+        <section id="pricing" className="relative z-10 px-6 py-24 bg-white/50 backdrop-blur-sm" aria-labelledby="pricing-title">
+          <div className="max-w-7xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mb-16"
+            >
+              <h2 id="pricing-title" className="text-4xl sm:text-5xl font-bold text-slate-900 mb-4 font-display">
+                {t.landing.pricingTitle}
+              </h2>
+              <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+                {t.landing.pricingSubtitle}
+              </p>
+            </motion.div>
+
+            <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto" role="list" aria-label="Offres Piggyback">
+              <motion.article
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="bg-white rounded-3xl p-8 shadow-lg shadow-slate-900/5 border border-slate-100 flex flex-col"
+                role="listitem"
+              >
+                <div className="w-12 h-12 bg-violet-100 rounded-xl flex items-center justify-center mb-6" aria-hidden="true">
+                  <PiggyBank className="w-6 h-6 text-violet-600" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-1">{t.landing.planFree}</h3>
+                <p className="text-2xl font-bold text-slate-800 mb-3">{t.landing.free}</p>
+                <p className="text-slate-600 text-sm mb-3">{t.landing.planFreeDesc}</p>
+                <ul className="space-y-2 mb-6 flex-1 text-slate-600 text-sm" aria-label="Fonctionnalités gratuites">
+                  {(t.landing.planFreeFeatures as string).split("\n").map((line, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" aria-hidden="true" />
+                      <span>{line}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href="/app"
+                  className="inline-flex items-center justify-center gap-2 w-full py-3 rounded-xl font-semibold bg-violet-600 text-white hover:bg-violet-500 transition-colors"
+                >
+                  {t.landing.getStarted}
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </motion.article>
+
+              <motion.article
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.1 }}
+                className="bg-white rounded-3xl p-8 shadow-xl shadow-violet-900/10 border-2 border-violet-200 flex flex-col relative"
+                role="listitem"
+              >
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-violet-600 text-white text-xs font-bold rounded-full">
+                  {t.landing.planPremium}
+                </div>
+                <div className="w-12 h-12 bg-violet-100 rounded-xl flex items-center justify-center mb-6 mt-2" aria-hidden="true">
+                  <Crown className="w-6 h-6 text-violet-600" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-1">{t.landing.planPremium}</h3>
+                <p className="text-2xl font-bold text-slate-800 mb-1">{t.landing.planPremiumPrice}</p>
+                <p className="text-slate-500 text-xs mb-3">{t.landing.planPremiumPriceNote}</p>
+                <p className="text-slate-600 text-sm mb-3">{t.landing.planPremiumDesc}</p>
+                <ul className="space-y-2 mb-6 flex-1 text-slate-600 text-sm" aria-label="Fonctionnalités Premium">
+                  {(t.landing.planPremiumFeatures as string).split("\n").map((line, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-violet-500 flex-shrink-0 mt-0.5" aria-hidden="true" />
+                      <span>{line}</span>
+                    </li>
+                  ))}
+                </ul>
+                <span className="inline-flex items-center justify-center gap-2 w-full py-3 rounded-xl font-semibold bg-slate-100 text-slate-500 cursor-default">
+                  {t.landing.upgradeComingSoon}
+                </span>
+              </motion.article>
+
+              <motion.article
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 }}
+                className="bg-white rounded-3xl p-8 shadow-lg shadow-slate-900/5 border border-slate-100 flex flex-col opacity-90"
+                role="listitem"
+              >
+                <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center mb-6" aria-hidden="true">
+                  <Zap className="w-6 h-6 text-amber-600" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-1">{t.landing.planIAComingSoon}</h3>
+                <p className="text-sm font-semibold text-amber-600 mb-3">{t.landing.comingSoon}</p>
+                <p className="text-slate-600 text-sm mb-3">{t.landing.planIAComingSoonDesc}</p>
+                <ul className="space-y-2 mb-6 flex-1 text-slate-600 text-sm" aria-label="Fonctionnalités IA">
+                  {(t.landing.planIAFeatures as string).split("\n").map((line, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <Zap className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" aria-hidden="true" />
+                      <span>{line}</span>
+                    </li>
+                  ))}
+                </ul>
+                <span className="inline-flex items-center justify-center gap-2 w-full py-3 rounded-xl font-semibold bg-slate-100 text-slate-500 cursor-default whitespace-nowrap">
+                  {t.landing.comingSoon}
+                </span>
+              </motion.article>
+            </div>
+          </div>
+        </section>
 
       {/* CTA Section */}
       <section className="relative z-10 px-6 py-24" aria-labelledby="cta-title">
