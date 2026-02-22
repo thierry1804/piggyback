@@ -9,14 +9,51 @@ create table if not exists public.plans (
   is_one_shot boolean default false,
   price_amount int,
   price_currency text default 'MGA',
+  -- Prix early-bird : après early_bird_cap souscriptions, utiliser price_amount_after_early
+  price_amount_after_early int,
+  early_bird_cap int,
   created_at timestamptz default now()
 );
 
-insert into public.plans (id, name, max_goals, is_one_shot, price_amount, price_currency)
+-- Ajouter les colonnes early-bird si la table existait déjà (migration antérieure sans ces colonnes)
+alter table public.plans add column if not exists price_amount_after_early int;
+alter table public.plans add column if not exists early_bird_cap int;
+
+insert into public.plans (id, name, max_goals, is_one_shot, price_amount, price_currency, price_amount_after_early, early_bird_cap)
 values
-  ('free', 'Gratuit', 1, false, null, 'MGA'),
-  ('premium', 'Premium One-Shot', null, true, 15000, 'MGA')
-on conflict (id) do nothing;
+  ('free', 'Gratuit', 1, false, null, 'MGA', null, null),
+  ('premium', 'Premium One-Shot', null, true, 15000, 'MGA', 25000, 100)
+on conflict (id) do update set
+  price_amount_after_early = excluded.price_amount_after_early,
+  early_bird_cap = excluded.early_bird_cap;
+
+-- Prix effectif d'un plan (early-bird pour premium : 15000 Ar pour les 100 premières, puis 25000 Ar)
+create or replace function public.get_plan_effective_price(p_plan_id text)
+returns int
+language plpgsql
+security definer
+set search_path = ''
+stable
+as $$
+declare
+  p public.plans;
+  premium_count int;
+begin
+  select * into p from public.plans where id = p_plan_id;
+  if not found then
+    return null;
+  end if;
+  if p.early_bird_cap is not null and p.price_amount_after_early is not null then
+    select count(*) into premium_count from public.abonnements where plan_id = p_plan_id;
+    if premium_count < p.early_bird_cap then
+      return p.price_amount;
+    else
+      return p.price_amount_after_early;
+    end if;
+  end if;
+  return p.price_amount;
+end;
+$$;
 
 alter table public.plans enable row level security;
 

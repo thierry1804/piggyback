@@ -434,7 +434,12 @@ export default function Landing() {
                   <Crown className="w-6 h-6 text-violet-600" />
                 </div>
                 <h3 className="text-xl font-bold text-slate-900 mb-1">{t.landing.planPremium}</h3>
-                <p className="text-2xl font-bold text-slate-800 mb-1">{t.landing.planPremiumPrice}</p>
+                <p className="text-2xl font-bold text-slate-800 mb-1">
+                  {t.landing.planPremiumPrice}
+                  <span className="block text-lg font-semibold text-slate-500 mt-0.5">
+                    → {t.landing.planPremiumPriceAfter}
+                  </span>
+                </p>
                 <p className="text-slate-500 text-xs mb-3">{t.landing.planPremiumPriceNote}</p>
                 <p className="text-slate-600 text-sm mb-3">{t.landing.planPremiumDesc}</p>
                 <ul className="space-y-2 mb-6 flex-1 text-slate-600 text-sm" aria-label="Fonctionnalités Premium">
